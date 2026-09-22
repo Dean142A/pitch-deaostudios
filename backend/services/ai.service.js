@@ -47,7 +47,7 @@ function getAnthropicClient() {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function retryWithBackoff(fn, retries = 3, delayMs = 1500) {
+async function retryWithBackoff(fn, retries = 5, delayMs = 2000) {
   let lastErr;
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -56,11 +56,11 @@ async function retryWithBackoff(fn, retries = 3, delayMs = 1500) {
       lastErr = err;
       const msg = err.message || '';
       const status = err.status || err.statusCode;
-      const isTransient = status === 503 || status === 429 || status === 500 || msg.includes('503') || msg.includes('overloaded') || msg.includes('UNAVAILABLE') || msg.includes('high demand');
+      const isTransient = status === 503 || status === 429 || status === 500 || msg.includes('503') || msg.includes('overloaded') || msg.includes('UNAVAILABLE') || msg.includes('high demand') || msg.includes('FetchError');
       if (attempt < retries && isTransient) {
-        console.warn(`[Gemini Retry] Attempt ${attempt}/${retries} failed (${msg}). Retrying in ${delayMs}ms...`);
+        console.warn(`[Gemini Retry] Attempt ${attempt}/${retries} failed (${msg.slice(0, 120)}...). Retrying in ${delayMs}ms...`);
         await sleep(delayMs);
-        delayMs *= 1.5;
+        delayMs = Math.round(delayMs * 1.8);
       } else {
         throw err;
       }
@@ -89,7 +89,7 @@ async function complete(prompt, options = {}) {
         return await retryWithBackoff(async () => {
           const result = await model.generateContent(prompt);
           return result.response.text();
-        }, 3, 1500);
+        }, 5, 2000);
       } catch (err) {
         lastError = err;
         console.warn(`[Gemini] Model ${modelName} failed after retries: ${err.message}. Trying next candidate model...`);
