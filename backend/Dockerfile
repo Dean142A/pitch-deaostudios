@@ -4,7 +4,7 @@ FROM node:20-alpine AS base
 WORKDIR /app
 
 # Install build dependencies if native addons needed
-RUN apk add --no-co-cache python3 make g++
+RUN apk add --no-cache python3 make g++
 
 COPY package*.json ./
 RUN npm ci --only=production
