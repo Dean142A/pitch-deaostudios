@@ -40,34 +40,37 @@ async function generateDeck(deckId, input, progressCallback) {
 
   try {
     await pool.query(`UPDATE decks SET status = 'generating' WHERE id = $1`, [deckId]);
-    progressCallback?.({ status: 'generating', step: 1, total: 4, message: 'Planning slide structure...' });
+    progressCallback?.({ status: 'generating', step: 1, total: 2, message: 'Generating full pitch deck with AI...' });
 
-    const t1 = Date.now();
-    const slideTypes = await aiService.brainstormSlides(input);
-    await logAction(null, 'brainstorm_structure', slideTypes, Date.now() - t1);
+    const t = Date.now();
+    let slidesData;
+    try {
+      slidesData = await aiService.generateFullDeck(input);
+    } catch (fullDeckErr) {
+      console.warn('[generateDeck] Single-prompt generation failed, using per-slide fallback:', fullDeckErr.message);
+      const slideTypes = await aiService.brainstormSlides(input);
+      slidesData = [];
+      for (let i = 0; i < slideTypes.length; i++) {
+        const slideType = slideTypes[i];
+        const content = await aiService.generateSlideContent(input, slideType);
+        slidesData.push({
+          slide_type: slideType,
+          layout: content.layout || 'single_column',
+          content,
+          chartData: content.chartSuggestion && content.chartSuggestion.type !== 'none' ? content.chartSuggestion : null,
+        });
+      }
+    }
 
-    progressCallback?.({ status: 'generating', step: 2, total: 4, message: `Generating ${slideTypes.length} slides...` });
-
-    const STYLE_TO_TONE = { 'modern-tech': 'bold', 'corporate': 'professional', 'creative': 'storytelling' };
-    const writingTone = STYLE_TO_TONE[input.style] || 'professional';
+    progressCallback?.({ status: 'generating', step: 2, total: 2, message: 'Saving slides to database...' });
 
     const slides = [];
-    for (let i = 0; i < slideTypes.length; i++) {
-      const slideType = slideTypes[i];
-      progressCallback?.({
-        status: 'generating', step: 2, total: 4,
-        message: `Writing slide ${i + 1}/${slideTypes.length}: ${slideType}...`,
-        slideProgress: { current: i + 1, total: slideTypes.length },
-      });
-
-      const t = Date.now();
-      const content = await aiService.generateSlideContent(input, slideType, slides);
-      const layout = content.layout || 'single_column';
-
-      let chartData = null;
-      if (content.chartSuggestion && content.chartSuggestion.type !== 'none') {
-        chartData = content.chartSuggestion;
-      }
+    for (let i = 0; i < slidesData.length; i++) {
+      const s = slidesData[i];
+      const slideType = s.slide_type || 'title';
+      const content = s.content || {};
+      const layout = s.layout || 'single_column';
+      const chartData = s.chartData && s.chartData.type !== 'none' ? s.chartData : null;
 
       const slideResult = await pool.query(
         `INSERT INTO slides (deck_id, slide_type, slide_order, content, chart_data, layout)
@@ -80,7 +83,7 @@ async function generateDeck(deckId, input, progressCallback) {
       slides.push(slide);
     }
 
-    progressCallback?.({ status: 'generating', step: 3, total: 4, message: 'Finalizing deck...' });
+    progressCallback?.({ status: 'generating', step: 2, total: 2, message: 'Finalizing deck...' });
     await saveVersion(deckId, slides);
     await pool.query(`UPDATE decks SET status = 'completed', updated_at = now() WHERE id = $1`, [deckId]);
 

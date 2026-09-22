@@ -263,8 +263,69 @@ function getAIStatus() {
   };
 }
 
+// ─── Generate Entire Pitch Deck in 1 Single AI Prompt ──────────────────────────
+async function generateFullDeck(deckInput) {
+  const numSlides = Math.min(Math.max(parseInt(deckInput.numSlides) || 12, 5), 20);
+
+  const prompt = `
+You are a world-class venture capitalist and pitch deck strategist. Generate a complete, investor-ready pitch deck for the following startup.
+
+Company Details:
+- Name: ${deckInput.companyName}
+- Industry: ${deckInput.industry}
+- Product Description: ${deckInput.productDescription}
+- Target Market: ${deckInput.targetMarket}
+- Funding Goal: ${deckInput.fundingGoal}
+- Key Achievements: ${deckInput.keyAchievements}
+${deckInput.teamMembers ? `- Team: ${deckInput.teamMembers}` : ''}
+- Style: ${deckInput.style || 'modern-tech'}
+
+Generate exactly ${numSlides} slides. Return a single JSON object with a "slides" array.
+Each slide item must contain:
+{
+  "slide_type": "title|problem|solution|product_demo|market_size|business_model|traction|competitive_landscape|go_to_market|team|financials|funding_ask|roadmap|closing",
+  "layout": "single_column|two_column|hero|chart_focus|team_grid",
+  "content": {
+    "headline": "punchy investor-ready headline",
+    "subheadline": "supporting line (optional)",
+    "bullets": ["concise bullet 1 (max 12 words)", "concise bullet 2", "concise bullet 3"],
+    "body": "optional paragraph text",
+    "speakerNotes": "presenter talk track notes"
+  },
+  "chartData": {
+    "type": "bar|line|pie|none",
+    "title": "chart title",
+    "labels": ["label1", "label2", "label3"],
+    "data": [10, 25, 60]
+  }
+}
+
+Requirements:
+- First slide must be "title".
+- Include key slides: problem, solution, market_size, business_model, traction, financials, funding_ask, closing.
+- Charts should only be present when relevant (e.g. market_size, traction, financials). Otherwise set "type": "none".
+
+Return ONLY raw JSON, no markdown formatting.`;
+
+  const raw = await complete(prompt, { maxTokens: 8192 });
+  try {
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+      return parsed.slides;
+    }
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch (err) {
+    console.warn('[generateFullDeck] Single-prompt JSON parse failed, returning fallback structure:', err.message);
+  }
+  throw new Error('Failed to parse AI generated deck payload.');
+}
+
 module.exports = {
   complete,
+  generateFullDeck,
   generateSlideContent,
   brainstormSlides,
   refineSlideText,
