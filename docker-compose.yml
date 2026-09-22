@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pitch_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-deao_pitch_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deao_secure_db_pass_123!}
+      POSTGRES_DB: ${POSTGRES_DB:-deao_pitch}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pitch_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pitch_backend
+    restart: always
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deao_pitch_user}:${POSTGRES_PASSWORD:-deao_secure_db_pass_123!}@db:5432/${POSTGRES_DB:-deao_pitch}
+      JWT_SECRET: ${JWT_SECRET:-269374d1b2df1fc94d030e0acea50d85d41609bfadbc8c719764b4193c95f5cf}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-deao2026!}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@deaostudios.com}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-auto}
+      STORAGE_PATH: /app/storage
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+    volumes:
+      - storage_data:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 4000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pitch_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ""
+        NEXT_PUBLIC_WS_URL: ""
+    container_name: pitch_frontend
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - backend
+    networks:
+      - pitch_network
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: pitch_nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - pitch_network
+
+volumes:
+  pgdata:
+  storage_data:
+
+networks:
+  pitch_network:
+    driver: bridge
