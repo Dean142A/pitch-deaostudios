@@ -39,6 +39,7 @@ const aiController = require('./controllers/ai.controller');
 const { cleanupOldFiles } = require('./services/export.service');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 // ─── Storage Setup ─────────────────────────────────────────────────────────────

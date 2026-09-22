@@ -30,10 +30,10 @@ function getActiveProvider() {
 }
 
 // ─── Gemini Client ─────────────────────────────────────────────────────────────
-function getGeminiClient() {
+function getGeminiClient(modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash') {
   if (!process.env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not set');
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  return genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  return genAI.getGenerativeModel({ model: modelName });
 }
 
 // ─── Anthropic Client ──────────────────────────────────────────────────────────
@@ -50,9 +50,19 @@ async function complete(prompt, options = {}) {
   const provider = getActiveProvider();
 
   if (provider === 'gemini') {
-    const model = getGeminiClient();
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const primaryModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    try {
+      const model = getGeminiClient(primaryModel);
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (err) {
+      if (err.message?.includes('not found') || err.message?.includes('404')) {
+        const fallbackModel = getGeminiClient('gemini-1.5-pro');
+        const result = await fallbackModel.generateContent(prompt);
+        return result.response.text();
+      }
+      throw err;
+    }
   }
 
   if (provider === 'anthropic') {
