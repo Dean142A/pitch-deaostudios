@@ -45,28 +45,54 @@ function getAnthropicClient() {
   return new AnthropicClass({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function retryWithBackoff(fn, retries = 3, delayMs = 1500) {
+  let lastErr;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = err.message || '';
+      const status = err.status || err.statusCode;
+      const isTransient = status === 503 || status === 429 || status === 500 || msg.includes('503') || msg.includes('overloaded') || msg.includes('UNAVAILABLE') || msg.includes('high demand');
+      if (attempt < retries && isTransient) {
+        console.warn(`[Gemini Retry] Attempt ${attempt}/${retries} failed (${msg}). Retrying in ${delayMs}ms...`);
+        await sleep(delayMs);
+        delayMs *= 1.5;
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw lastErr;
+}
+
 // ─── Core Completion ───────────────────────────────────────────────────────────
 async function complete(prompt, options = {}) {
   const provider = getActiveProvider();
 
   if (provider === 'gemini') {
-    const candidateModels = [
+    const candidateModels = Array.from(new Set([
       process.env.GEMINI_MODEL,
       'gemini-3.6-flash',
       'gemini-1.5-flash',
       'gemini-2.5-flash',
       'gemini-2.0-flash',
-    ].filter(Boolean);
+    ].filter(Boolean)));
 
     let lastError;
     for (const modelName of candidateModels) {
       try {
         const model = getGeminiClient(modelName);
-        const result = await model.generateContent(prompt);
-        return result.response.text();
+        return await retryWithBackoff(async () => {
+          const result = await model.generateContent(prompt);
+          return result.response.text();
+        }, 3, 1500);
       } catch (err) {
         lastError = err;
-        console.warn(`[Gemini] Model ${modelName} failed: ${err.message}. Trying next...`);
+        console.warn(`[Gemini] Model ${modelName} failed after retries: ${err.message}. Trying next candidate model...`);
       }
     }
     throw lastError;
