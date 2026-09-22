@@ -181,10 +181,12 @@ async function restoreVersion(deckId, versionId, userId) {
 }
 
 // ─── Helper: verify a user can access a deck ──────────────────────────────────
-async function verifyDeckAccess(deckId, userId) {
+async function verifyDeckAccess(deckId, userId, role = 'user') {
   const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
   if (!deck.rows[0]) throw new Error('Deck not found');
-  // Allow access only to owner (admin check done at controller level via role)
+  if (role !== 'admin' && deck.rows[0].owner_id !== userId) {
+    throw new Error('Forbidden: Not deck owner');
+  }
   return deck.rows[0];
 }
 

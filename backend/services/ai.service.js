@@ -61,20 +61,31 @@ function extractJSON(raw, fallback = null, contextName = 'JSON parse') {
 }
 
 /**
+ * Explicit prompt sanitizer: strips control chars, XML tags, and prompt injection triggers
+ */
+function sanitizeForPrompt(val) {
+  if (val == null) return '';
+  return String(val)
+    .replace(/[\r\n\0\x1B]/g, ' ')
+    .replace(/<\/?[^>]+>/g, '')
+    .replace(/ignore (the )?previous instructions|system prompt|disregard (all )?instructions/gi, '')
+    .trim();
+}
+
+/**
  * Format and sanitize user inputs safely inside XML delimiters to prevent prompt injection
  */
 function formatUserData(deckInput) {
-  const sanitize = (val) => String(val || '').replace(/<\/?[^>]+>/g, '').trim();
   return `
 <user_data>
-  <company_name>${sanitize(deckInput.companyName)}</company_name>
-  <industry>${sanitize(deckInput.industry)}</industry>
-  <product_description>${sanitize(deckInput.productDescription)}</product_description>
-  <target_market>${sanitize(deckInput.targetMarket)}</target_market>
-  <funding_goal>${sanitize(deckInput.fundingGoal)}</funding_goal>
-  <key_achievements>${sanitize(deckInput.keyAchievements)}</key_achievements>
-  ${deckInput.teamMembers ? `<team>${sanitize(deckInput.teamMembers)}</team>` : ''}
-  <style>${sanitize(deckInput.style || 'modern-tech')}</style>
+  <company_name>${sanitizeForPrompt(deckInput.companyName)}</company_name>
+  <industry>${sanitizeForPrompt(deckInput.industry)}</industry>
+  <product_description>${sanitizeForPrompt(deckInput.productDescription)}</product_description>
+  <target_market>${sanitizeForPrompt(deckInput.targetMarket)}</target_market>
+  <funding_goal>${sanitizeForPrompt(deckInput.fundingGoal)}</funding_goal>
+  <key_achievements>${sanitizeForPrompt(deckInput.keyAchievements)}</key_achievements>
+  ${deckInput.teamMembers ? `<team>${sanitizeForPrompt(deckInput.teamMembers)}</team>` : ''}
+  <style>${sanitizeForPrompt(deckInput.style || 'modern-tech')}</style>
 </user_data>`;
 }
 
@@ -408,4 +419,5 @@ module.exports = {
   suggestLayout,
   getAIStatus,
   extractJSON,
+  sanitizeForPrompt,
 };

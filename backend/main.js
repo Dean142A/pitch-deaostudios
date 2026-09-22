@@ -214,29 +214,56 @@ app.use((err, req, res, next) => {
 const wss = new WebSocket.Server({ server, path: '/ws' });
 app.locals.wss = wss;
 
-wss.on('connection', (ws, req) => {
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const userConnections = new Map(); // userId -> Set<WebSocket>
+
+wss.on('connection', async (ws, req) => {
   const url = new URL(req.url, 'http://localhost');
   const token = url.searchParams.get('token');
 
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+
+    // Enforce max 5 concurrent WebSocket connections per user
+    const userSockets = userConnections.get(user.userId) || new Set();
+    if (userSockets.size >= 5) {
+      ws.close(4029, 'Too many concurrent WebSocket connections');
+      return;
+    }
+    userSockets.add(ws);
+    userConnections.set(user.userId, userSockets);
+
     ws.userId = user.userId;
     ws.userName = user.name;
+    ws.userRole = user.role;
+
     const deckId = url.searchParams.get('deckId');
-    if (deckId) ws.deckId = deckId;
+    if (deckId) {
+      if (!UUID_REGEX.test(deckId)) {
+        ws.close(4002, 'Invalid deck ID');
+        return;
+      }
+      // Verify user owns the deck or is admin before granting room access
+      try {
+        await deckService.verifyDeckAccess(deckId, user.userId, user.role);
+        ws.deckId = deckId;
+      } catch {
+        ws.close(4003, 'Forbidden: Deck access denied');
+        return;
+      }
+    }
 
     ws.send(JSON.stringify({ type: 'connected', userId: user.userId, name: user.name }));
 
-    if (deckId) {
+    if (ws.deckId) {
       wss.clients.forEach(client => {
-        if (client !== ws && client.deckId === deckId && client.readyState === 1) {
+        if (client !== ws && client.deckId === ws.deckId && client.readyState === 1) {
           client.send(JSON.stringify({ type: 'user_joined', userId: user.userId, name: user.name }));
         }
       });
     }
 
     ws.on('message', (data) => {
-      // FIX #14: Max WS message size to prevent memory exhaustion
       if (data.length > 64 * 1024) {
         ws.close(1009, 'Message too large');
         return;
@@ -245,7 +272,6 @@ wss.on('connection', (ws, req) => {
         const msg = JSON.parse(data.toString());
 
         if (msg.type === 'slide_edit' && ws.deckId) {
-          // FIX #15: Only forward safe, known fields — not arbitrary msg payload
           const safeMsg = {
             type: 'slide_edit',
             slideId: String(msg.slideId || '').slice(0, 100),
@@ -261,9 +287,15 @@ wss.on('connection', (ws, req) => {
     });
 
     ws.on('close', () => {
-      if (deckId) {
+      const activeSockets = userConnections.get(ws.userId);
+      if (activeSockets) {
+        activeSockets.delete(ws);
+        if (activeSockets.size === 0) userConnections.delete(ws.userId);
+      }
+
+      if (ws.deckId) {
         wss.clients.forEach(client => {
-          if (client !== ws && client.deckId === deckId && client.readyState === 1) {
+          if (client !== ws && client.deckId === ws.deckId && client.readyState === 1) {
             client.send(JSON.stringify({ type: 'user_left', userId: user.userId, name: user.name }));
           }
         });

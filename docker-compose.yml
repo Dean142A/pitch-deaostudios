@@ -30,7 +30,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-deao_pitch_user}:${POSTGRES_PASSWORD:-deao_secure_db_pass_123!}@db:5432/${POSTGRES_DB:-deao_pitch}
       JWT_SECRET: ${JWT_SECRET:-269374d1b2df1fc94d030e0acea50d85d41609bfadbc8c719764b4193c95f5cf}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-deao2026!}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-deao_admin_pass_2026!}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@deaostudios.com}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
