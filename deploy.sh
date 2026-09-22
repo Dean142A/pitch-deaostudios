@@ -79,19 +79,45 @@ ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "
 "
 echo -e "${GREEN}✓ Containers deployed.${NC}"
 
-# Step 5: Database Migrations & Health Check
-echo -e "\n${YELLOW}[5/5] Running Database Migrations & Health Verification...${NC}"
+# Step 5: Database Migrations, Host Nginx Proxy & Health Check
+echo -e "\n${YELLOW}[5/5] Running Migrations, Host Nginx Config & Health Verification...${NC}"
 ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "
     cd '${REMOTE_DIR}'
     echo 'Waiting for database health...'
     sleep 5
     echo 'Running DB Migrations...'
     docker compose exec -T backend node utils/migrate.js || true
+
+    # Configure Host Nginx to proxy domain / localhost to Docker container port 8090
+    if [ -d /etc/nginx/sites-available ]; then
+        cat << 'EOF' > /etc/nginx/sites-available/pitch.deaostudios.cloud
+server {
+    listen 80;
+    server_name pitch.deaostudios.cloud;
+    client_max_body_size 20M;
+
+    location / {
+        proxy_pass http://127.0.0.1:8090;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+        ln -sf /etc/nginx/sites-available/pitch.deaostudios.cloud /etc/nginx/sites-enabled/pitch.deaostudios.cloud
+        nginx -t && systemctl reload nginx || true
+    fi
+
     echo 'Checking Container Status...'
     docker compose ps
 "
 
 echo -e "\n${GREEN}======================================================${NC}"
 echo -e "${GREEN}  🎉 DEPLOYMENT COMPLETE!${NC}"
-echo -e "${GREEN}  App is live on: http://${VPS_HOST}${NC}"
+echo -e "${GREEN}  App Container Running on Port: 8090${NC}"
+echo -e "${GREEN}  Host Domain: http://pitch.deaostudios.cloud${NC}"
 echo -e "${GREEN}======================================================${NC}"
