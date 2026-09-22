@@ -90,7 +90,8 @@ ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "
 
     # Configure Host Nginx to proxy domain / localhost to Docker container port 8090
     if [ -d /etc/nginx/sites-available ]; then
-        cat << 'EOF' > /etc/nginx/sites-available/pitch.deaostudios.cloud
+        if [ ! -f /etc/nginx/sites-available/pitch.deaostudios.cloud ]; then
+            cat << 'EOF' > /etc/nginx/sites-available/pitch.deaostudios.cloud
 server {
     listen 80;
     server_name pitch.deaostudios.cloud;
@@ -108,7 +109,14 @@ server {
     }
 }
 EOF
-        ln -sf /etc/nginx/sites-available/pitch.deaostudios.cloud /etc/nginx/sites-enabled/pitch.deaostudios.cloud
+            ln -sf /etc/nginx/sites-available/pitch.deaostudios.cloud /etc/nginx/sites-enabled/pitch.deaostudios.cloud
+        fi
+
+        # Auto-apply Certbot SSL if certbot is installed
+        if command -v certbot &> /dev/null; then
+            certbot --nginx -d pitch.deaostudios.cloud --non-interactive --agree-tos --email admin@deaostudios.com || true
+        fi
+
         nginx -t && systemctl reload nginx || true
     fi
 
