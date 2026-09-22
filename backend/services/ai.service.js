@@ -56,10 +56,15 @@ async function retryWithBackoff(fn, retries = 5, delayMs = 2000) {
       lastErr = err;
       const msg = err.message || '';
       const status = err.status || err.statusCode;
-      const isTransient = status === 503 || status === 429 || status === 500 || msg.includes('503') || msg.includes('overloaded') || msg.includes('UNAVAILABLE') || msg.includes('high demand') || msg.includes('FetchError');
+      const isTransient = status === 503 || status === 429 || status === 500 || msg.includes('503') || msg.includes('429') || msg.includes('quota') || msg.includes('overloaded') || msg.includes('UNAVAILABLE') || msg.includes('high demand') || msg.includes('FetchError');
       if (attempt < retries && isTransient) {
-        console.warn(`[Gemini Retry] Attempt ${attempt}/${retries} failed (${msg.slice(0, 120)}...). Retrying in ${delayMs}ms...`);
-        await sleep(delayMs);
+        let waitTime = delayMs;
+        const match = msg.match(/retry in ([0-9.]+)s/i);
+        if (match && match[1]) {
+          waitTime = Math.min(Math.ceil(parseFloat(match[1])) * 1000 + 1000, 45000);
+        }
+        console.warn(`[Gemini Retry] Attempt ${attempt}/${retries} failed (${msg.slice(0, 100)}...). Retrying in ${waitTime}ms...`);
+        await sleep(waitTime);
         delayMs = Math.round(delayMs * 1.8);
       } else {
         throw err;
@@ -114,7 +119,7 @@ async function complete(prompt, options = {}) {
 // ─── Slide Content Generation ──────────────────────────────────────────────────
 async function generateSlideContent(deckInput, slideType, existingSlides = []) {
   const prompt = `
-You are an expert pitch deck consultant. Generate compelling content for a "${slideType}" slide.
+You are an expert pitch deck consultant. Generate compelling, investor-ready content for a "${slideType}" slide.
 
 Company Information:
 - Company Name: ${deckInput.companyName}
@@ -126,13 +131,15 @@ Company Information:
 ${deckInput.teamMembers ? `- Team: ${deckInput.teamMembers}` : ''}
 
 Slide type: ${slideType}
+Style Tone: ${deckInput.style || 'modern-tech'}
 
 Return a JSON object with:
 {
   "headline": "short powerful headline",
   "subheadline": "supporting line (optional)",
-  "bullets": ["point 1", "point 2", "point 3"],
+  "bullets": ["concise point 1 (max 12 words)", "concise point 2", "concise point 3"],
   "body": "optional paragraph text",
+  "layout": "two_column|single_column|hero|chart_focus|team_grid",
   "chartSuggestion": {
     "type": "bar|line|pie|none",
     "title": "chart title",
@@ -148,7 +155,7 @@ Only return valid JSON, no markdown.`;
   try {
     return JSON.parse(raw.replace(/```json|```/g, '').trim());
   } catch {
-    return { headline: slideType, bullets: [raw.slice(0, 200)], body: '', speakerNotes: '' };
+    return { headline: slideType, bullets: [raw.slice(0, 200)], body: '', layout: 'single_column', speakerNotes: '' };
   }
 }
 

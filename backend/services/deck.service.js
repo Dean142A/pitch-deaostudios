@@ -61,10 +61,8 @@ async function generateDeck(deckId, input, progressCallback) {
       });
 
       const t = Date.now();
-      let content = await aiService.generateSlideContent(input, slideType, slides);
-      content = await aiService.refineSlideText(content, writingTone);
-      const layoutSuggestion = await aiService.suggestLayout(content, 'single_column');
-      const layout = layoutSuggestion.layout || 'single_column';
+      const content = await aiService.generateSlideContent(input, slideType, slides);
+      const layout = content.layout || 'single_column';
 
       let chartData = null;
       if (content.chartSuggestion && content.chartSuggestion.type !== 'none') {
