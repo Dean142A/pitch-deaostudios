@@ -1,0 +1,20 @@
+{
+  "id": "corporate",
+  "name": "Corporate",
+  "description": "Clean, professional, trusted — for enterprise and finance",
+  "colors": {
+    "background": "#0c1a2e",
+    "accent": "#0ea5e9",
+    "accentSecondary": "#0284c7",
+    "text": "#e2e8f0",
+    "muted": "#64748b",
+    "heading": "#0ea5e9"
+  },
+  "fonts": {
+    "heading": "Syne",
+    "body": "DM Sans"
+  },
+  "layouts": ["single_column", "two_column", "hero", "chart_focus", "team_grid"],
+  "accentBarWidth": 5,
+  "slideNumberVisible": true
+}

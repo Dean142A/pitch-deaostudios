@@ -1,0 +1,30 @@
+{
+  "name": "pitch-deaostudios-backend",
+  "version": "1.0.0",
+  "description": "Deao Studios Pitch Deck Generator - Backend",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "migrate": "node utils/migrate.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@google/generative-ai": "^0.21.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pdfkit": "^0.14.0",
+    "pg": "^8.11.3",
+    "pptxgenjs": "^3.12.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

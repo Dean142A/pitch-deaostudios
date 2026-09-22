@@ -1,0 +1,20 @@
+{
+  "id": "modern-tech",
+  "name": "Modern Tech",
+  "description": "Dark, bold, futuristic — ideal for tech startups",
+  "colors": {
+    "background": "#0f172a",
+    "accent": "#6366f1",
+    "accentSecondary": "#8b5cf6",
+    "text": "#e2e8f0",
+    "muted": "#64748b",
+    "heading": "#6366f1"
+  },
+  "fonts": {
+    "heading": "Syne",
+    "body": "DM Sans"
+  },
+  "layouts": ["single_column", "two_column", "hero", "chart_focus"],
+  "accentBarWidth": 5,
+  "slideNumberVisible": true
+}
