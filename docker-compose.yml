@@ -55,8 +55,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ""
-        NEXT_PUBLIC_WS_URL: ""
+        NEXT_PUBLIC_API_URL: "https://pitch.deaostudios.cloud"
+        NEXT_PUBLIC_WS_URL: "wss://pitch.deaostudios.cloud"
     container_name: pitch_frontend
     restart: always
     environment:
