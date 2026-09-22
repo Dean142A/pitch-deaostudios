@@ -65,6 +65,17 @@ export default function DeckEditor() {
     }
   }
 
+  async function retryGeneration() {
+    try {
+      setProgress({ status: 'generating', step: 1, total: 4, message: 'Restarting generation...' });
+      await api.retryDeck(deckId);
+      startPolling();
+      connectWebSocket();
+    } catch (err) {
+      alert(`Failed to restart generation: ${err.message}`);
+    }
+  }
+
   function startPolling() {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
@@ -240,6 +251,15 @@ export default function DeckEditor() {
               </>
             )}
 
+            {/* Regenerate Trigger */}
+            <button
+              className="btn-secondary"
+              onClick={retryGeneration}
+              style={{ fontSize: 12, padding: '5px 12px' }}
+            >
+              ⚡ Regenerate
+            </button>
+
             <button className="btn-secondary" onClick={loadVersions} style={{ fontSize: 12, padding: '5px 12px' }}>
               Versions
             </button>
@@ -295,7 +315,7 @@ export default function DeckEditor() {
           </div>
 
           {/* Center Stage Presentation Canvas */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: 32, display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 32, display: 'flex', justifyContent: 'center', alignItems: currentSlide ? 'flex-start' : 'center' }}>
             {currentSlide ? (
               <div style={{
                 width: '100%', maxWidth: 900, aspectRatio: '16/9',
@@ -370,9 +390,42 @@ export default function DeckEditor() {
                   <span>Slide {selectedSlide + 1} of {slides.length}</span>
                 </div>
               </div>
+            ) : deck.status === 'generating' || deck.status === 'queued' ? (
+              <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12,
+                padding: '40px 48px', maxWidth: 520, width: '100%', textAlign: 'center',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+              }}>
+                <div style={{ display: 'inline-block', width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', marginBottom: 16 }} className="animate-spin" />
+                <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Crafting Pitch Deck...</h3>
+                <p style={{ color: 'var(--text-subtle)', fontSize: 13, margin: '0 0 20px' }}>
+                  {progress?.message || 'Gemini 3.6 Flash is drafting your slides...'}
+                </p>
+                {progress?.slideProgress && (
+                  <div style={{ background: 'var(--bg)', borderRadius: 8, height: 8, overflow: 'hidden', marginBottom: 20 }}>
+                    <div style={{
+                      width: `${(progress.slideProgress.current / progress.slideProgress.total) * 100}%`,
+                      height: '100%', background: 'var(--accent)', transition: 'width 0.3s ease',
+                    }} />
+                  </div>
+                )}
+                <button className="btn-secondary" onClick={retryGeneration} style={{ fontSize: 12 }}>
+                  ⚡ Force Restart Generation
+                </button>
+              </div>
             ) : (
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', paddingTop: 100 }}>
-                No slide selected
+              <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12,
+                padding: '40px 48px', maxWidth: 480, width: '100%', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
+                <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Deck Not Generated Yet</h3>
+                <p style={{ color: 'var(--text-subtle)', fontSize: 13, margin: '0 0 20px' }}>
+                  Click below to generate slides using Gemini 3.6 Flash AI.
+                </p>
+                <button className="btn-primary" onClick={retryGeneration} style={{ fontSize: 13, padding: '8px 20px' }}>
+                  ⚡ Start AI Slide Generation
+                </button>
               </div>
             )}
           </div>

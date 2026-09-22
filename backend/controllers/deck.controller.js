@@ -173,7 +173,40 @@ async function getDeckMetrics(req, res) {
   }
 }
 
+async function retryDeck(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId)) return res.status(400).json({ error: 'Invalid deck ID' });
+    const deck = await deckService.getDeck(req.params.deckId, req.user.userId);
+    let input = deck.input_data;
+    if (typeof input === 'string') {
+      try { input = JSON.parse(input); } catch {}
+    }
+    if (!input || !input.companyName) {
+      return res.status(400).json({ error: 'No input data found to retry generation' });
+    }
+    await deckService.setDeckStatus(deck.id, 'queued');
+
+    queue.enqueue(deck.id, async (progressCb) => {
+      return deckService.generateDeck(deck.id, input, progressCb);
+    }, (progress) => {
+      if (req.app.locals.wss) {
+        req.app.locals.wss.clients.forEach(client => {
+          if (client.readyState === 1 && client.deckId === deck.id) {
+            client.send(JSON.stringify({ type: 'progress', ...progress }));
+          }
+        });
+      }
+    }).catch(err => {
+      console.error(`[Queue Retry] Deck ${deck.id} generation failed:`, err.message);
+    });
+
+    res.json({ message: 'Generation restarted', deckId: deck.id, status: 'queued' });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to retry deck' });
+  }
+}
+
 module.exports = {
   createDeck, getDeck, listDecks, updateSlide, deleteDeck,
-  getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics,
+  getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics, retryDeck,
 };

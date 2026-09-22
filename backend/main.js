@@ -163,6 +163,7 @@ app.post('/api/decks', auth, deckController.createDeck);
 app.get('/api/decks', auth, deckController.listDecks);
 app.get('/api/decks/:deckId', auth, deckController.getDeck);
 app.delete('/api/decks/:deckId', auth, deckController.deleteDeck);
+app.post('/api/decks/:deckId/retry', auth, deckController.retryDeck);
 
 // Slides
 app.put('/api/decks/:deckId/slides/:slideId', auth, deckController.updateSlide);
@@ -279,6 +280,8 @@ setInterval(() => {
   cleanupOldFiles(parseInt(process.env.DECK_EXPIRY_DAYS) || 7);
 }, 24 * 60 * 60 * 1000);
 
+const deckService = require('./services/deck.service');
+
 // ─── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
@@ -293,4 +296,7 @@ server.listen(PORT, () => {
   console.log(`   • Gemini:    ${hasGemini ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`   • Anthropic: ${hasAnthropic ? '✅ Configured' : '⬜  Not configured (optional)'}`);
   console.log(`   • Provider:  ${process.env.AI_PROVIDER || 'auto'}\n`);
+
+  // Auto-recover interrupted decks on startup
+  deckService.recoverOrphanDecks(wss);
 });

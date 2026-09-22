@@ -310,8 +310,42 @@ async function logExport(deckId, userId, format, filename) {
   );
 }
 
+async function recoverOrphanDecks(wss) {
+  try {
+    const queue = require('../utils/queue.helper');
+    const result = await pool.query(`SELECT * FROM decks WHERE status IN ('generating', 'queued')`);
+    for (const deck of result.rows) {
+      console.log(`[Startup Recovery] Found interrupted deck ${deck.id} (${deck.name})...`);
+      let inputData = deck.input_data;
+      if (typeof inputData === 'string') {
+        try { inputData = JSON.parse(inputData); } catch {}
+      }
+      if (inputData && inputData.companyName) {
+        await setDeckStatus(deck.id, 'queued');
+        queue.enqueue(deck.id, async (progressCb) => {
+          return generateDeck(deck.id, inputData, progressCb);
+        }, (progress) => {
+          if (wss) {
+            wss.clients.forEach(client => {
+              if (client.readyState === 1 && client.deckId === deck.id) {
+                client.send(JSON.stringify({ type: 'progress', ...progress }));
+              }
+            });
+          }
+        }).catch(err => {
+          console.error(`[Startup Recovery] Re-enqueue failed for ${deck.id}:`, err.message);
+        });
+      } else {
+        await pool.query(`UPDATE decks SET status = 'failed' WHERE id = $1`, [deck.id]);
+      }
+    }
+  } catch (err) {
+    console.error('[Startup Recovery] Error recovering orphan decks:', err.message);
+  }
+}
+
 module.exports = {
   createDeck, generateDeck, getDeck, listDecks, updateSlide, deleteDeck,
   saveVersion, getVersions, restoreVersion, getAiLogs, getDeckMetrics,
-  logExport, setDeckStatus,
+  logExport, setDeckStatus, recoverOrphanDecks,
 };

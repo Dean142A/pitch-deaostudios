@@ -44,6 +44,7 @@ const api = {
   createDeck: (data) => request('POST', '/api/decks', data),
   listDecks: () => request('GET', '/api/decks'),
   getDeck: (id) => request('GET', `/api/decks/${id}`),
+  retryDeck: (id) => request('POST', `/api/decks/${id}/retry`),
   deleteDeck: (id) => request('DELETE', `/api/decks/${id}`),
 
   // Slides
