@@ -28,10 +28,30 @@ const STYLES = {
   'creative':    { bg: '1a0a0f', title: 'f43f5e', text: 'f8fafc', accent: 'fb7185', font: 'Calibri' },
 };
 
+const BACKGROUND_EXPORT_MAP = {
+  'dark-obsidian':  { bg: '090d16', title: '818cf8', text: 'f3f4f6', accent: '818cf8' },
+  'minimal-grid':   { bg: '0f172a', title: '38bdf8', text: 'f8fafc', accent: '38bdf8' },
+  'aurora-mesh':    { bg: '0a0e1a', title: 'a5b4fc', text: 'f1f5f9', accent: '6366f1' },
+  'slate-clean':    { bg: 'ffffff', title: '1e3a8a', text: '0f172a', accent: '2563eb' },
+  'blueprint-dot':  { bg: '0b192c', title: '60a5fa', text: 'f1f5f9', accent: '60a5fa' },
+  'sunset-glass':   { bg: '190614', title: 'fb7185', text: 'fff1f2', accent: 'fb7185' },
+  'studio-dark':    { bg: '121212', title: '34d399', text: 'e5e5e5', accent: '10b981' },
+  'cyber-glow':     { bg: '022c22', title: '34d399', text: 'ecfdf5', accent: '34d399' },
+};
+
+function getDeckExportStyle(deck) {
+  const inputData = typeof deck.input_data === 'string' ? JSON.parse(deck.input_data) : (deck.input_data || {});
+  const bgPreset = inputData.backgroundPreset;
+  if (bgPreset && BACKGROUND_EXPORT_MAP[bgPreset]) {
+    return { ...STYLES[deck.style], ...BACKGROUND_EXPORT_MAP[bgPreset] };
+  }
+  return STYLES[deck.style] || STYLES['modern-tech'];
+}
+
 // ─── Export to PPTX ────────────────────────────────────────────────────────────
 async function exportToPptx(deck, slides, filename) {
   const pptx = new PptxGenJS();
-  const style = STYLES[deck.style] || STYLES['modern-tech'];
+  const style = getDeckExportStyle(deck);
 
   pptx.layout = 'LAYOUT_WIDE';
   pptx.title = deck.name;
@@ -110,7 +130,7 @@ async function exportToPptx(deck, slides, filename) {
 // ─── Export to PDF ─────────────────────────────────────────────────────────────
 async function exportToPdf(deck, slides, filename) {
   return new Promise((resolve, reject) => {
-    const style = STYLES[deck.style] || STYLES['modern-tech'];
+    const style = getDeckExportStyle(deck);
     const outputPath = safeOutputPath(filename, 'pdf'); // FIX #41 applied
 
     const doc = new PDFDocument({

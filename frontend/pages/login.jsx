@@ -1,5 +1,4 @@
-// pages/login.jsx
-
+// pages/login.jsx - Notion Style Authentication Page
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import api from '../utils/api';
@@ -28,50 +27,30 @@ export default function Login() {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'var(--bg)',
-      padding: '20px',
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', background: 'var(--bg)', padding: '20px',
     }}>
-      {/* Background grid */}
-      <div style={{
-        position: 'fixed', inset: 0, opacity: 0.03,
-        backgroundImage: 'linear-gradient(#6366f1 1px, transparent 1px), linear-gradient(90deg, #6366f1 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }} />
-
-      {/* Glow orb */}
-      <div style={{
-        position: 'fixed', width: 600, height: 600,
-        background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
-        top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ position: 'relative', width: '100%', maxWidth: 420 }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            padding: '8px 18px',
-            background: 'rgba(99,102,241,0.1)',
-            border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: 30,
-            marginBottom: 20,
-          }}>
-            <span style={{ fontSize: 18 }}>⬡</span>
-            <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: 14, letterSpacing: 2, color: '#a5b4fc' }}>DEAO STUDIOS</span>
-          </div>
-          <h1 style={{ fontSize: 28, margin: '0 0 8px', color: '#f8fafc' }}>Pitch Generator</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 14 }}>Internal access only</p>
+            width: 44, height: 44, borderRadius: 10,
+            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontWeight: 800, fontSize: 20, marginBottom: 16,
+            boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)',
+          }}>⬡</div>
+          <h1 style={{ fontSize: 24, margin: '0 0 6px', color: 'var(--text)', fontWeight: 800 }}>
+            Deao Studios Pitch Generator
+          </h1>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 13 }}>
+            Sign in to access your Notion workspace
+          </p>
         </div>
 
-        <div className="card" style={{ padding: '32px' }}>
+        <div className="notion-card" style={{ padding: '28px' }}>
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 18 }}>
-              <label>Email</label>
+            <div style={{ marginBottom: 16 }}>
+              <label>Email Address</label>
               <input
                 className="input"
                 type="email"
@@ -81,7 +60,7 @@ export default function Login() {
                 required
               />
             </div>
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 20 }}>
               <label>Password</label>
               <input
                 className="input"
@@ -95,8 +74,8 @@ export default function Login() {
 
             {error && (
               <div style={{
-                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                color: '#fca5a5', borderRadius: 8, padding: '10px 14px',
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#f87171', borderRadius: 6, padding: '9px 13px',
                 fontSize: 13, marginBottom: 18,
               }}>
                 {error}
@@ -107,15 +86,15 @@ export default function Login() {
               className="btn-primary"
               type="submit"
               disabled={loading}
-              style={{ width: '100%', padding: '12px', fontSize: 15 }}
+              style={{ width: '100%', justifyContent: 'center', padding: '10px' }}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing in...' : 'Sign In to Workspace'}
             </button>
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, marginTop: 20 }}>
-          pitch.deaostudios.cloud · Internal Tool
+        <p style={{ textAlign: 'center', color: 'var(--text-subtle)', fontSize: 12, marginTop: 24 }}>
+          pitch.deaostudios.cloud · Notion Workspace Edition
         </p>
       </div>
     </div>

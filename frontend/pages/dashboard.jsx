@@ -1,185 +1,207 @@
-// pages/dashboard.jsx
-
+// pages/dashboard.jsx - Notion Database Style Decks Overview
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import NotionLayout from '../components/NotionLayout';
+import { BACKGROUND_PRESETS, getBackgroundPreset } from '../utils/backgrounds';
 import api from '../utils/api';
-
-const STYLES_INFO = {
-  'modern-tech': { label: 'Modern Tech', color: '#6366f1', icon: '⬡' },
-  'corporate':   { label: 'Corporate', color: '#0ea5e9', icon: '◈' },
-  'creative':    { label: 'Creative', color: '#f43f5e', icon: '◉' },
-};
 
 export default function Dashboard() {
   const router = useRouter();
   const [decks, setDecks] = useState([]);
-  const [user, setUser] = useState(null);
-  const [aiStatus, setAiStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     const token = localStorage.getItem('deao_token');
     if (!token) { router.push('/login'); return; }
 
-    const u = JSON.parse(localStorage.getItem('deao_user') || '{}');
-    setUser(u);
-
-    Promise.all([api.listDecks(), api.aiStatus()])
-      .then(([d, ai]) => { setDecks(d); setAiStatus(ai); })
+    api.listDecks()
+      .then(setDecks)
       .catch(() => router.push('/login'))
       .finally(() => setLoading(false));
   }, []);
 
-  function logout() {
-    localStorage.clear();
-    router.push('/login');
+  async function handleDeleteDeck(e, deckId) {
+    e.stopPropagation();
+    if (!confirm('Are you sure you want to delete this deck?')) return;
+    try {
+      await api.deleteDeck(deckId);
+      setDecks(decks.filter(d => d.id !== deckId));
+    } catch (err) {
+      alert(`Delete failed: ${err.message}`);
+    }
   }
 
+  const filteredDecks = decks.filter(d => {
+    const matchesSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
+                          (d.owner_name && d.owner_name.toLowerCase().includes(search.toLowerCase()));
+    const matchesStatus = filterStatus === 'all' || d.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
-    </div>
+    <NotionLayout activeTab="dashboard" title="All Decks">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
+      </div>
+    </NotionLayout>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      {/* Nav */}
-      <nav style={{
-        borderBottom: '1px solid var(--border)',
-        padding: '0 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 60,
-        background: 'rgba(13,21,37,0.8)',
-        backdropFilter: 'blur(12px)',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ color: 'var(--accent)', fontSize: 22 }}>⬡</span>
-          <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: 15, letterSpacing: 1 }}>DEAO PITCH</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {/* AI Status */}
-          {aiStatus && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '4px 12px',
-              background: aiStatus.geminiConfigured || aiStatus.anthropicConfigured
-                ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-              border: `1px solid ${aiStatus.geminiConfigured || aiStatus.anthropicConfigured ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-              borderRadius: 20, fontSize: 12,
-              color: aiStatus.geminiConfigured || aiStatus.anthropicConfigured ? '#34d399' : '#f87171',
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'block' }} />
-              {aiStatus.activeProvider === 'none' ? 'No AI' : `AI: ${aiStatus.activeProvider}`}
-            </div>
-          )}
-
-          {user?.role === 'admin' && (
-            <Link href="/admin" style={{ color: 'var(--text-muted)', fontSize: 13, textDecoration: 'none' }}>
-              Admin
-            </Link>
-          )}
-
-          <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>{user?.name}</span>
-          <button onClick={logout} className="btn-secondary" style={{ padding: '6px 14px', fontSize: 12 }}>
-            Sign Out
-          </button>
-        </div>
-      </nav>
-
-      <div style={{ padding: '40px 32px', maxWidth: 1200, margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 36 }}>
+    <NotionLayout activeTab="dashboard" title="All Decks">
+      <div style={{ padding: '32px 36px', maxWidth: 1200, margin: '0 auto' }}>
+        {/* Top Notion View Toolbar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 16 }}>
           <div>
-            <h1 style={{ margin: '0 0 6px', fontSize: 32 }}>Pitch Decks</h1>
-            <p style={{ color: 'var(--text-muted)', margin: 0 }}>{decks.length} deck{decks.length !== 1 ? 's' : ''} total</p>
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Pitch Decks Database</h1>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
+              {decks.length} deck{decks.length !== 1 ? 's' : ''} in workspace
+            </p>
           </div>
+
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>+</span> New Deck
+            <button className="btn-primary">
+              <span>+</span> New Pitch Deck
             </button>
           </Link>
         </div>
 
-        {/* AI Warning */}
-        {aiStatus && !aiStatus.geminiConfigured && !aiStatus.anthropicConfigured && (
-          <div style={{
-            background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
-            borderRadius: 12, padding: '14px 20px', marginBottom: 24,
-            display: 'flex', alignItems: 'center', gap: 12,
-          }}>
-            <span style={{ fontSize: 20 }}>⚠️</span>
-            <div>
-              <strong style={{ color: '#fbbf24' }}>No AI provider configured.</strong>
-              <span style={{ color: 'var(--text-muted)', marginLeft: 8, fontSize: 14 }}>
-                Add your Gemini API key in <Link href="/admin" style={{ color: 'var(--accent)' }}>Admin Settings</Link> to enable deck generation.
-              </span>
-            </div>
+        {/* Notion Search & Filter Bar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          borderRadius: 8, padding: '10px 16px', marginBottom: 24, gap: 16,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+            <span style={{ fontSize: 14, color: 'var(--text-subtle)' }}>🔍</span>
+            <input
+              className="input"
+              style={{ border: 'none', background: 'transparent', padding: 0 }}
+              placeholder="Search by deck name or owner..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
-        )}
 
-        {/* Deck Grid */}
-        {decks.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, color: 'var(--text-subtle)', fontWeight: 600 }}>STATUS:</span>
+            {['all', 'completed', 'generating', 'queued', 'failed'].map(st => (
+              <button
+                key={st}
+                onClick={() => setFilterStatus(st)}
+                style={{
+                  background: filterStatus === st ? 'var(--bg-hover)' : 'transparent',
+                  border: filterStatus === st ? '1px solid var(--border)' : '1px solid transparent',
+                  borderRadius: 6, color: filterStatus === st ? 'var(--text)' : 'var(--text-muted)',
+                  fontSize: 12, padding: '4px 10px', cursor: 'pointer', textTransform: 'capitalize',
+                }}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Decks Grid / Database View */}
+        {filteredDecks.length === 0 ? (
           <div style={{
-            textAlign: 'center', padding: '80px 20px',
-            border: '1px dashed var(--border)', borderRadius: 16,
+            textAlign: 'center', padding: '60px 20px',
+            background: 'var(--bg-card)', border: '1px dashed var(--border)',
+            borderRadius: 12,
           }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🎯</div>
-            <h3 style={{ color: '#94a3b8', marginBottom: 8 }}>No decks yet</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Create your first AI-powered pitch deck</p>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>📚</div>
+            <h3 style={{ margin: '0 0 6px', fontSize: 16, color: 'var(--text)' }}>No decks found</h3>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--text-muted)' }}>
+              {search || filterStatus !== 'all' ? 'Try adjusting your search or filters' : 'Create your first pitch deck using AI'}
+            </p>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <button className="btn-primary">Create Your First Deck</button>
+              <button className="btn-primary">Create New Deck</button>
             </Link>
           </div>
         ) : (
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: 20,
           }}>
-            {decks.map(deck => {
-              const styleInfo = STYLES_INFO[deck.style] || STYLES_INFO['modern-tech'];
+            {filteredDecks.map(deck => {
+              const bgPresetId = deck.input_data?.backgroundPreset || 'dark-obsidian';
+              const preset = getBackgroundPreset(bgPresetId);
+
               return (
-                <div key={deck.id} className="card" style={{
-                  padding: 0, overflow: 'hidden',
-                  transition: 'all 0.2s',
-                  cursor: 'pointer',
-                }}
+                <div
+                  key={deck.id}
+                  className="notion-card"
                   onClick={() => router.push(`/deck/${deck.id}`)}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  style={{
+                    padding: 0, overflow: 'hidden', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column',
+                  }}
                 >
-                  {/* Deck preview header */}
+                  {/* Pre-saved Background Preview Canvas Header */}
                   <div style={{
-                    height: 120, background: '#0f172a',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    borderBottom: '1px solid var(--border)',
-                    position: 'relative',
-                    overflow: 'hidden',
+                    height: 130,
+                    background: preset.style.background,
+                    backgroundImage: preset.style.backgroundImage,
+                    backgroundSize: preset.style.backgroundSize || 'cover',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                    padding: 14, borderBottom: '1px solid var(--border)', position: 'relative',
                   }}>
-                    <div style={{
-                      position: 'absolute', left: 0, top: 0, bottom: 0, width: 4,
-                      background: styleInfo.color,
-                    }} />
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 32, color: styleInfo.color, marginBottom: 6 }}>{styleInfo.icon}</div>
-                      <div style={{ fontFamily: 'Syne', fontSize: 13, color: '#94a3b8' }}>{styleInfo.label}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 4,
+                        background: 'rgba(0, 0, 0, 0.5)', color: preset.style.color,
+                        backdropFilter: 'blur(4px)', border: `1px solid ${preset.style.border}`,
+                      }}>
+                        🎨 {preset.name}
+                      </span>
+                      <span className={`badge badge-${deck.status}`}>
+                        {deck.status}
+                      </span>
                     </div>
-                    <div style={{ position: 'absolute', top: 10, right: 10 }}>
-                      <span className={`badge badge-${deck.status}`}>{deck.status}</span>
+
+                    <div style={{
+                      fontSize: 16, fontWeight: 800, color: preset.style.color,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>
+                      {deck.name}
                     </div>
                   </div>
 
-                  <div style={{ padding: '16px 20px' }}>
-                    <h3 style={{ margin: '0 0 4px', fontSize: 15 }}>{deck.name}</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '0 0 12px' }}>
-                      {deck.slide_count || deck.num_slides} slides · {deck.owner_name}
-                    </p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>
-                      {new Date(deck.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
+                  {/* Card Body */}
+                  <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                        <span>📊 {deck.slide_count || deck.num_slides || 15} slides</span>
+                        <span>•</span>
+                        <span>👤 {deck.owner_name || 'Owner'}</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
+                        Created {new Date(deck.created_at || deck.updated_at).toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      marginTop: 16, pt: 12, borderTop: '1px solid var(--border-light)',
+                    }}>
+                      <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
+                        Open in Canvas →
+                      </span>
+                      <button
+                        onClick={e => handleDeleteDeck(e, deck.id)}
+                        title="Delete Deck"
+                        style={{
+                          background: 'none', border: 'none', color: 'var(--text-subtle)',
+                          cursor: 'pointer', fontSize: 13, padding: 4, borderRadius: 4,
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -187,6 +209,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-    </div>
+    </NotionLayout>
   );
 }

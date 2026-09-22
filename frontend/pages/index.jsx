@@ -1,8 +1,9 @@
-// pages/index.jsx - Deck Creation Form
-
+// pages/index.jsx - Notion-Style Deck Creation Wizard
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
+import NotionLayout from '../components/NotionLayout';
+import BackgroundPicker from '../components/BackgroundPicker';
+import { BACKGROUND_PRESETS, getBackgroundPreset } from '../utils/backgrounds';
 import api from '../utils/api';
 
 const STYLES = [
@@ -17,11 +18,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [logoFile, setLogoFile] = useState(null);
+  const [showBgPicker, setShowBgPicker] = useState(false);
 
   const [form, setForm] = useState({
     companyName: '', industry: '', productDescription: '',
     targetMarket: '', fundingGoal: '', keyAchievements: '',
     teamMembers: '', numSlides: 15, style: 'modern-tech',
+    backgroundPreset: 'dark-obsidian',
   });
 
   useEffect(() => {
@@ -51,94 +54,86 @@ export default function Home() {
 
   const required1 = form.companyName && form.industry && form.productDescription;
   const required2 = form.targetMarket && form.fundingGoal && form.keyAchievements;
+  const activeBg = getBackgroundPreset(form.backgroundPreset);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      {/* Background */}
-      <div style={{
-        position: 'fixed', inset: 0, opacity: 0.02,
-        backgroundImage: 'linear-gradient(#6366f1 1px, transparent 1px), linear-gradient(90deg, #6366f1 1px, transparent 1px)',
-        backgroundSize: '40px 40px', pointerEvents: 'none',
-      }} />
-
-      {/* Nav */}
-      <nav style={{
-        borderBottom: '1px solid var(--border)', padding: '0 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 60, background: 'rgba(13,21,37,0.9)', backdropFilter: 'blur(12px)',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <span style={{ color: 'var(--accent)', fontSize: 22 }}>⬡</span>
-          <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: 15, letterSpacing: 1, color: 'var(--text)' }}>DEAO PITCH</span>
-        </Link>
-        <Link href="/dashboard" style={{ color: 'var(--text-muted)', fontSize: 13, textDecoration: 'none' }}>← Dashboard</Link>
-      </nav>
-
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h1 style={{ fontSize: 40, margin: '0 0 12px' }}>Create Pitch Deck</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0 }}>AI-powered deck generation in minutes</p>
-        </div>
-
-        {/* Steps indicator */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40, gap: 0 }}>
-          {['Company Info', 'Market & Goals', 'Style & Generate'].map((label, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                opacity: step >= i + 1 ? 1 : 0.4,
-                cursor: i + 1 < step ? 'pointer' : 'default',
-              }} onClick={() => i + 1 < step && setStep(i + 1)}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: step >= i + 1 ? 'var(--accent)' : 'var(--bg-elevated)',
-                  border: `1px solid ${step >= i + 1 ? 'var(--accent)' : 'var(--border)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 700,
-                }}>
-                  {step > i + 1 ? '✓' : i + 1}
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 500, color: step === i + 1 ? 'var(--text)' : 'var(--text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              {i < 2 && <div style={{ width: 40, height: 1, background: 'var(--border)', margin: '0 12px' }} />}
+    <NotionLayout activeTab="new" title="New Pitch Deck">
+      <div style={{ maxWidth: 780, margin: '0 auto', padding: '36px 24px' }}>
+        {/* Header callout */}
+        <div className="notion-callout" style={{ marginBottom: 32 }}>
+          <span style={{ fontSize: 24 }}>✨</span>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
+              Notion AI Pitch Deck Creator
             </div>
-          ))}
+            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+              Answer a few questions about your startup to generate a fully structured, multi-slide pitch deck with pre-saved backgrounds and interactive charts.
+            </div>
+          </div>
         </div>
 
-        {/* ─── Step 1 ─── */}
-        {step === 1 && (
-          <div className="card">
-            <h2 style={{ margin: '0 0 24px', fontSize: 20 }}>Company Information</h2>
+        {/* Wizard Steps Navigation */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
+          borderRadius: 8, padding: '12px 20px', marginBottom: 32,
+        }}>
+          {['1. Company Info', '2. Market & Goals', '3. Style & Background'].map((label, i) => {
+            const stepNum = i + 1;
+            const active = step === stepNum;
+            const completed = step > stepNum;
+            return (
+              <div
+                key={i}
+                onClick={() => completed && setStep(stepNum)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  cursor: completed ? 'pointer' : 'default',
+                  opacity: active || completed ? 1 : 0.4,
+                  fontSize: 13, fontWeight: active ? 700 : 500,
+                  color: active ? 'var(--accent)' : (completed ? '#34d399' : 'var(--text-muted)'),
+                }}
+              >
+                <span>{completed ? '✓' : stepNum + '.'}</span>
+                <span>{label.replace(/^\d+\.\s*/, '')}</span>
+              </div>
+            );
+          })}
+        </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 18 }}>
+        {/* Step 1 */}
+        {step === 1 && (
+          <div className="notion-card">
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>🏢</span> Company Profile
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div>
                 <label>Company Name *</label>
-                <input className="input" placeholder="Acme Corp" value={form.companyName}
+                <input className="input" placeholder="e.g., Acme Robotics" value={form.companyName}
                   onChange={e => set('companyName', e.target.value)} />
               </div>
               <div>
-                <label>Industry *</label>
-                <input className="input" placeholder="SaaS / FinTech / HealthTech" value={form.industry}
+                <label>Industry / Vertical *</label>
+                <input className="input" placeholder="e.g., AI / B2B SaaS" value={form.industry}
                   onChange={e => set('industry', e.target.value)} />
               </div>
             </div>
 
-            <div style={{ marginBottom: 18 }}>
-              <label>Product / Service Description *</label>
+            <div style={{ marginBottom: 16 }}>
+              <label>Product & Problem Statement *</label>
               <textarea className="input" rows={3}
-                placeholder="Describe what your product does, the problem it solves, and how it works..."
+                placeholder="What problem are you solving? Describe your product and core value proposition..."
                 value={form.productDescription}
                 onChange={e => set('productDescription', e.target.value)}
                 style={{ resize: 'vertical' }}
               />
             </div>
 
-            <div style={{ marginBottom: 18 }}>
-              <label>Team Members (optional)</label>
-              <input className="input" placeholder="CEO: Jane Doe (ex-Google), CTO: John Smith (MIT)"
+            <div style={{ marginBottom: 16 }}>
+              <label>Founding Team (optional)</label>
+              <input className="input" placeholder="CEO: Jane Doe (ex-Stripe), CTO: John Smith (MIT)"
                 value={form.teamMembers}
                 onChange={e => set('teamMembers', e.target.value)} />
             </div>
@@ -146,58 +141,60 @@ export default function Home() {
             <div style={{ marginBottom: 24 }}>
               <label>Company Logo (optional)</label>
               <div style={{
-                border: '1px dashed var(--border)', borderRadius: 8, padding: '20px',
+                border: '1px dashed var(--border)', borderRadius: 8, padding: '16px',
                 textAlign: 'center', cursor: 'pointer',
-                background: logoFile ? 'rgba(99,102,241,0.05)' : 'transparent',
-                transition: 'all 0.2s',
+                background: logoFile ? 'rgba(99,102,241,0.05)' : 'var(--bg-sidebar)',
+                transition: 'all 0.15s ease',
               }}
-                onDragOver={e => { e.preventDefault(); }}
+                onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) setLogoFile(f); }}
               >
                 <input type="file" accept="image/*" id="logo-input" style={{ display: 'none' }}
                   onChange={e => setLogoFile(e.target.files[0])} />
-                <label htmlFor="logo-input" style={{ cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <label htmlFor="logo-input" style={{ cursor: 'pointer', color: 'var(--text-muted)', margin: 0 }}>
                   {logoFile ? (
-                    <span style={{ color: 'var(--accent)' }}>✓ {logoFile.name}</span>
+                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>✓ {logoFile.name}</span>
                   ) : (
-                    <span>Drop image here or <span style={{ color: 'var(--accent)' }}>browse</span></span>
+                    <span>Drop logo here or <span style={{ color: 'var(--accent)' }}>browse file</span></span>
                   )}
                 </label>
               </div>
             </div>
 
-            <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1}
-              style={{ float: 'right', padding: '11px 28px' }}>
-              Next →
-            </button>
-            <div style={{ clear: 'both' }} />
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1}>
+                Next: Market & Goals →
+              </button>
+            </div>
           </div>
         )}
 
-        {/* ─── Step 2 ─── */}
+        {/* Step 2 */}
         {step === 2 && (
-          <div className="card">
-            <h2 style={{ margin: '0 0 24px', fontSize: 20 }}>Market & Goals</h2>
+          <div className="notion-card">
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>🎯</span> Market, Traction & Funding
+            </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 18 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div>
-                <label>Target Market *</label>
-                <input className="input" placeholder="SMBs in North America, 50-500 employees"
+                <label>Target Audience / TAM *</label>
+                <input className="input" placeholder="e.g., Mid-market healthcare providers ($40B TAM)"
                   value={form.targetMarket}
                   onChange={e => set('targetMarket', e.target.value)} />
               </div>
               <div>
                 <label>Funding Goal *</label>
-                <input className="input" placeholder="$2M Seed Round"
+                <input className="input" placeholder="e.g., $1.5M Seed Round"
                   value={form.fundingGoal}
                   onChange={e => set('fundingGoal', e.target.value)} />
               </div>
             </div>
 
-            <div style={{ marginBottom: 18 }}>
-              <label>Key Achievements & Metrics *</label>
+            <div style={{ marginBottom: 16 }}>
+              <label>Key Milestones & Metrics *</label>
               <textarea className="input" rows={3}
-                placeholder="$50K MRR, 200 customers, 40% MoM growth, 3 enterprise pilots..."
+                placeholder="e.g., $40k MRR, 120 paid accounts, 35% MoM user growth..."
                 value={form.keyAchievements}
                 onChange={e => set('keyAchievements', e.target.value)}
                 style={{ resize: 'vertical' }}
@@ -205,86 +202,124 @@ export default function Home() {
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <label>Number of Slides</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <label>Slide Count ({form.numSlides} slides)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <input type="range" min="8" max="25" value={form.numSlides}
                   onChange={e => set('numSlides', parseInt(e.target.value))}
                   style={{ flex: 1, accentColor: 'var(--accent)' }} />
-                <div style={{
-                  minWidth: 44, textAlign: 'center', fontWeight: 700,
-                  color: 'var(--accent)', fontSize: 18,
-                }}>{form.numSlides}</div>
+                <span style={{ fontWeight: 700, color: 'var(--accent)', fontSize: 16, width: 30, textAlign: 'right' }}>
+                  {form.numSlides}
+                </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <button className="btn-secondary" onClick={() => setStep(1)}>← Back</button>
-              <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2}
-                style={{ flex: 1, padding: '11px' }}>
-                Next: Choose Style →
+              <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2}>
+                Next: Theme & Background →
               </button>
             </div>
           </div>
         )}
 
-        {/* ─── Step 3 ─── */}
+        {/* Step 3 */}
         {step === 3 && (
-          <div className="card">
-            <h2 style={{ margin: '0 0 24px', fontSize: 20 }}>Choose a Style</h2>
+          <div className="notion-card">
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>🎨</span> Theme & Pre-Saved Background
+            </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
-              {STYLES.map(s => (
-                <div key={s.id}
-                  onClick={() => set('style', s.id)}
-                  style={{
-                    border: `2px solid ${form.style === s.id ? s.color : 'var(--border)'}`,
-                    borderRadius: 12, padding: '20px 16px', cursor: 'pointer',
-                    background: form.style === s.id ? `${s.color}12` : 'var(--bg-elevated)',
-                    textAlign: 'center', transition: 'all 0.2s',
-                    boxShadow: form.style === s.id ? `0 0 20px ${s.color}30` : 'none',
-                  }}
-                >
-                  <div style={{ fontSize: 32, color: s.color, marginBottom: 10 }}>{s.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.desc}</div>
+            {/* Visual Style Selection */}
+            <div style={{ marginBottom: 24 }}>
+              <label>Visual Theme</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                {STYLES.map(s => (
+                  <div
+                    key={s.id}
+                    onClick={() => set('style', s.id)}
+                    style={{
+                      border: form.style === s.id ? `2px solid ${s.color}` : '1px solid var(--border)',
+                      borderRadius: 8, padding: '14px 12px', cursor: 'pointer',
+                      background: form.style === s.id ? `${s.color}15` : 'var(--bg-sidebar)',
+                      textAlign: 'center', transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ fontSize: 24, color: s.color, marginBottom: 6 }}>{s.icon}</div>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{s.label}</div>
+                    <div style={{ color: 'var(--text-subtle)', fontSize: 11, marginTop: 2 }}>{s.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pre-Saved Slide Background Preset Selector */}
+            <div style={{ marginBottom: 24 }}>
+              <label>Pre-Saved Slide Background</label>
+              <div
+                onClick={() => setShowBgPicker(true)}
+                style={{
+                  border: '1px solid var(--border)', borderRadius: 8, padding: 14,
+                  background: activeBg.style.background,
+                  backgroundImage: activeBg.style.backgroundImage,
+                  backgroundSize: activeBg.style.backgroundSize || 'cover',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between', transition: 'all 0.15s ease',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 6,
+                    background: activeBg.previewGradient,
+                    border: `1px solid ${activeBg.style.border}`,
+                  }} />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: activeBg.style.color }}>
+                      {activeBg.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: activeBg.style.color, opacity: 0.8 }}>
+                      {activeBg.description}
+                    </div>
+                  </div>
                 </div>
-              ))}
+                <span className="btn-secondary" style={{ fontSize: 12, padding: '4px 10px' }}>
+                  Change Background
+                </span>
+              </div>
             </div>
 
             {/* Summary */}
             <div style={{
-              background: 'var(--bg-elevated)', borderRadius: 10,
-              padding: '16px 20px', marginBottom: 24,
-              border: '1px solid var(--border)',
+              background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '14px 18px', marginBottom: 24,
             }}>
-              <h4 style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: 1 }}>GENERATION SUMMARY</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 13 }}>
-                <span style={{ color: 'var(--text-muted)' }}>Company:</span><span>{form.companyName}</span>
-                <span style={{ color: 'var(--text-muted)' }}>Industry:</span><span>{form.industry}</span>
-                <span style={{ color: 'var(--text-muted)' }}>Slides:</span><span>{form.numSlides}</span>
-                <span style={{ color: 'var(--text-muted)' }}>Style:</span><span>{STYLES.find(s => s.id === form.style)?.label}</span>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', uppercase: 'true', marginBottom: 8 }}>
+                SUMMARY
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
+                <div><span style={{ color: 'var(--text-muted)' }}>Company:</span> {form.companyName}</div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Industry:</span> {form.industry}</div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Slides:</span> {form.numSlides}</div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Background:</span> {activeBg.name}</div>
               </div>
             </div>
 
             {error && (
               <div style={{
-                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-                color: '#fca5a5', borderRadius: 8, padding: '10px 14px',
-                fontSize: 13, marginBottom: 18,
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#f87171', borderRadius: 6, padding: '10px 14px', fontSize: 13, marginBottom: 18,
               }}>
                 {error}
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <button className="btn-secondary" onClick={() => setStep(2)} disabled={loading}>← Back</button>
-              <button className="btn-primary" onClick={handleSubmit} disabled={loading}
-                style={{ flex: 1, padding: '12px', fontSize: 15 }}>
+              <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ padding: '10px 24px' }}>
                 {loading ? (
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <span style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%' }} className="animate-spin" />
-                    Starting Generation...
-                  </span>
+                  <>
+                    <span className="animate-spin" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} />
+                    Generating Deck...
+                  </>
                 ) : (
                   '🚀 Generate Pitch Deck'
                 )}
@@ -293,6 +328,15 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
+
+      {/* Pre-saved Background Picker Modal */}
+      {showBgPicker && (
+        <BackgroundPicker
+          selectedId={form.backgroundPreset}
+          onSelect={id => set('backgroundPreset', id)}
+          onClose={() => setShowBgPicker(false)}
+        />
+      )}
+    </NotionLayout>
   );
 }
