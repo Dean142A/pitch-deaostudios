@@ -82,9 +82,6 @@ async function complete(prompt, options = {}) {
     const candidateModels = Array.from(new Set([
       process.env.GEMINI_MODEL,
       'gemini-3.6-flash',
-      'gemini-1.5-flash',
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
     ].filter(Boolean)));
 
     let lastError;
@@ -97,9 +94,30 @@ async function complete(prompt, options = {}) {
         }, 5, 2000);
       } catch (err) {
         lastError = err;
-        console.warn(`[Gemini] Model ${modelName} failed after retries: ${err.message}. Trying next candidate model...`);
+        console.warn(`[Gemini] Model ${modelName} failed: ${err.message}`);
       }
     }
+
+    // If Anthropic key is available as fallback, try Anthropic
+    if (process.env.ANTHROPIC_API_KEY && Anthropic) {
+      console.warn('[Gemini] Quota limit hit for Gemini. Falling back to Anthropic Claude...');
+      try {
+        const client = getAnthropicClient();
+        const msg = await client.messages.create({
+          model: 'claude-opus-4-5',
+          max_tokens: options.maxTokens || 4096,
+          messages: [{ role: 'user', content: prompt }],
+        });
+        return msg.content[0].text;
+      } catch (anthropicErr) {
+        console.warn('[Anthropic Fallback] Failed:', anthropicErr.message);
+      }
+    }
+
+    if (lastError && lastError.message && (lastError.message.includes('Quota exceeded') || lastError.message.includes('429'))) {
+      throw new Error('Google Gemini API daily free tier limit reached (20 requests/day). Please update your API Key under Admin Settings or provide an Anthropic Key.');
+    }
+
     throw lastError;
   }
 
