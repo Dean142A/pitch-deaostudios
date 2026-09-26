@@ -1,6 +1,8 @@
 // utils/api.js
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = typeof window !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_API_URL || '')
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
 
 function getToken() {
   if (typeof window === 'undefined') return null;
@@ -19,18 +21,29 @@ async function request(method, path, body, opts = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 401) {
-    if (typeof window !== 'undefined') {
+  // Only redirect on 401 if not logging in or registering
+  if (res.status === 401 && path !== '/api/auth/login' && path !== '/api/auth/register') {
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
       localStorage.removeItem('deao_token');
+      localStorage.removeItem('deao_user');
       window.location.href = '/login';
     }
-    throw new Error('Unauthorized');
   }
 
-  const data = await res.json();
+  let data;
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    data = await res.json();
+  } else {
+    const text = await res.text();
+    console.error('Server returned non-JSON response:', text);
+    throw new Error(`Server returned HTTP ${res.status}`);
+  }
+
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
+
 
 const api = {
   // Auth
