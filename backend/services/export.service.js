@@ -154,11 +154,11 @@ async function exportToPptx(deck, slides, filename) {
 async function exportToPdf(deck, slides, filename) {
   return new Promise((resolve, reject) => {
     const style = getDeckExportStyle(deck);
-    const outputPath = safeOutputPath(filename, 'pdf'); // FIX #41 applied
+    const outputPath = safeOutputPath(filename, 'pdf');
 
     const doc = new PDFDocument({
       size: [1280, 720],
-      margins: { top: 40, bottom: 40, left: 60, right: 60 },
+      margins: { top: 0, bottom: 0, left: 0, right: 0 },
       autoFirstPage: false,
     });
 
@@ -167,7 +167,7 @@ async function exportToPdf(deck, slides, filename) {
 
     for (let slideIdx = 0; slideIdx < slides.length; slideIdx++) {
       const slide = slides[slideIdx];
-      doc.addPage();
+      doc.addPage({ size: [1280, 720], margins: { top: 0, bottom: 0, left: 0, right: 0 } });
       const content = (() => {
         try { return typeof slide.content === 'string' ? JSON.parse(slide.content) : slide.content; }
         catch { return {}; }
@@ -184,60 +184,62 @@ async function exportToPdf(deck, slides, filename) {
       doc.rect(0, 0, 12, 720).fill(`#${style.accent}`);
 
       if (slideTitle) {
-        doc.font('Helvetica-Bold').fontSize(slide.slide_type === 'title' ? 40 : 28)
-           .fillColor(`#${style.title}`).text(slideTitle, 50, 50, { width: 1180 });
+        doc.font('Helvetica-Bold').fontSize(slide.slide_type === 'title' ? 38 : 26)
+           .fillColor(`#${style.title}`).text(slideTitle, 50, 50, { width: 1180, height: 70, lineBreak: false });
       }
 
       if (slideSubtitle) {
-        doc.font('Helvetica').fontSize(16).fillColor('#94a3b8')
-           .text(slideSubtitle, 50, slide.slide_type === 'title' ? 120 : 100, { width: 1180 });
+        doc.font('Helvetica').fontSize(15).fillColor('#94a3b8')
+           .text(slideSubtitle, 50, slide.slide_type === 'title' ? 135 : 120, { width: 1180, height: 45, lineBreak: false });
       }
 
-      const bodyY = slide.slide_type === 'title' ? 220 : 170;
+      const bodyY = slide.slide_type === 'title' ? 200 : 175;
       if (content?.bullets?.length > 0) {
-        doc.font('Helvetica').fontSize(15).fillColor(`#${style.text}`);
+        doc.font('Helvetica').fontSize(14).fillColor(`#${style.text}`);
         content.bullets.forEach((bullet, i) => {
-          if (bodyY + i * 36 < 580) {
-            doc.text(`• ${bullet}`, 50, bodyY + i * 36, { width: chartData ? 650 : 1150 });
+          if (bodyY + i * 36 < 560) {
+            doc.text(`• ${bullet}`, 50, bodyY + i * 36, { width: chartData ? 650 : 1150, height: 30, lineBreak: false });
           }
         });
       } else if (content?.members?.length > 0) {
-        doc.font('Helvetica').fontSize(14).fillColor(`#${style.text}`);
+        doc.font('Helvetica').fontSize(13).fillColor(`#${style.text}`);
         content.members.forEach((m, i) => {
-          if (bodyY + i * 45 < 580) {
-            doc.font('Helvetica-Bold').text(`${m.name} — ${m.role}`, 50, bodyY + i * 45);
-            doc.font('Helvetica').fontSize(12).fillColor('#94a3b8').text(m.bio, 50, bodyY + i * 45 + 18);
+          if (bodyY + i * 45 < 560) {
+            doc.font('Helvetica-Bold').text(`${m.name} — ${m.role}`, 50, bodyY + i * 45, { lineBreak: false });
+            doc.font('Helvetica').fontSize(11).fillColor('#94a3b8').text(m.bio || '', 50, bodyY + i * 45 + 16, { width: 650, lineBreak: false });
           }
         });
       } else if (content?.body) {
         doc.font('Helvetica').fontSize(14).fillColor(`#${style.text}`)
-           .text(content.body, 50, bodyY, { width: chartData ? 650 : 1150 });
+           .text(content.body, 50, bodyY, { width: chartData ? 650 : 1150, height: 300, lineBreak: false });
       }
 
       if (content?.callout) {
-        doc.rect(50, 600, 1180, 45).fill('#1e293b');
-        doc.font('Helvetica-Bold').fontSize(13).fillColor(`#${style.accent}`)
-           .text(`💡 ${content.callout}`, 65, 615, { width: 1150 });
+        doc.rect(50, 580, 1180, 48).fill('#1e293b');
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(`#${style.accent}`)
+           .text(`💡 ${content.callout}`, 65, 596, { width: 1150, height: 28, lineBreak: false });
       }
 
       if (chartData && chartData.type !== 'none') {
-        doc.rect(740, 170, 490, 380).fill('#1e293b');
-        doc.font('Helvetica-Bold').fontSize(16).fillColor('#ffffff')
-           .text(`📊 ${chartData.title || 'Chart Data'}`, 760, 190);
+        doc.rect(740, 175, 490, 370).fill('#1e293b');
+        doc.font('Helvetica-Bold').fontSize(15).fillColor('#ffffff')
+           .text(`📊 ${chartData.title || 'Chart Data'}`, 760, 195, { width: 450, lineBreak: false });
         
         if (chartData.labels && chartData.datasets?.[0]?.data) {
           chartData.labels.forEach((label, li) => {
             const val = chartData.datasets[0].data[li];
-            doc.font('Helvetica').fontSize(13).fillColor('#94a3b8')
-               .text(`${label}:`, 760, 240 + li * 30);
-            doc.font('Helvetica-Bold').fontSize(13).fillColor('#38bdf8')
-               .text(`${val}`, 960, 240 + li * 30);
+            if (240 + li * 28 < 510) {
+              doc.font('Helvetica').fontSize(12).fillColor('#94a3b8')
+                 .text(`${label}:`, 760, 240 + li * 28, { lineBreak: false });
+              doc.font('Helvetica-Bold').fontSize(12).fillColor('#38bdf8')
+                 .text(`${val}`, 980, 240 + li * 28, { lineBreak: false });
+            }
           });
         }
       }
 
-      doc.font('Helvetica').fontSize(10).fillColor('#475569')
-         .text(`${slideIdx + 1} / ${slides.length}`, 1180, 680);
+      doc.font('Helvetica').fontSize(10).fillColor('#64748b')
+         .text(`Slide ${slideIdx + 1} of ${slides.length}`, 1150, 680, { width: 100, align: 'right', lineBreak: false });
     }
 
     doc.end();

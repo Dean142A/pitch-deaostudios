@@ -263,6 +263,31 @@ export default function DeckEditor() {
     }
   }
 
+  async function handleDuplicateSlide() {
+    const current = slides[selectedSlide];
+    if (!current) return;
+    try {
+      const parsedContent = safeParseJSON(current.content, {});
+      const parsedChart = safeParseJSON(current.chart_data, null);
+      
+      const newSlide = await api.addSlide(deckId, {
+        slide_type: current.slide_type || 'solution',
+        layout: current.layout || 'single_column',
+        content: { ...parsedContent, title: `${parsedContent.title || 'Slide'} (Copy)` },
+        chartData: parsedChart,
+      });
+
+      setSlides(prev => {
+        const next = [...prev];
+        next.splice(selectedSlide + 1, 0, newSlide);
+        return next;
+      });
+      setSelectedSlide(selectedSlide + 1);
+    } catch (err) {
+      alert(`Failed to duplicate slide: ${err.message}`);
+    }
+  }
+
   async function handleDeleteSlide() {
     if (slides.length <= 1) {
       alert('Deck must contain at least one slide');
@@ -527,16 +552,34 @@ export default function DeckEditor() {
                     </button>
                   </div>
 
-                  <button
-                    onClick={handleDeleteSlide}
-                    style={{
-                      background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e',
-                      border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: 6,
-                      fontSize: 12, padding: '4px 10px', cursor: 'pointer',
-                    }}
-                  >
-                    🗑️ Delete Slide
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button
+                      className="btn-primary"
+                      onClick={() => persistSlide(slideContent, slideChartData, slideType, slideLayout)}
+                      style={{ fontSize: 12, padding: '4px 12px', fontWeight: 700 }}
+                    >
+                      💾 Save Changes
+                    </button>
+
+                    <button
+                      className="btn-secondary"
+                      onClick={handleDuplicateSlide}
+                      style={{ fontSize: 12, padding: '4px 10px' }}
+                    >
+                      📋 Duplicate Slide
+                    </button>
+
+                    <button
+                      onClick={handleDeleteSlide}
+                      style={{
+                        background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e',
+                        border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: 6,
+                        fontSize: 12, padding: '4px 10px', cursor: 'pointer',
+                      }}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
 
                 {/* Presentation Canvas Box */}
