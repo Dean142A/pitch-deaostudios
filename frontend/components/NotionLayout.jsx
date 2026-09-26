@@ -30,10 +30,10 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
   }
 
   const navItems = [
-    { id: 'templates', label: 'Ready-Made Templates', icon: '🎨', path: '/?tab=templates' },
-    { id: 'new', label: 'AI Deck Creator', icon: '✨', path: '/?tab=ai', primary: true },
-    { id: 'dashboard', label: 'All Decks', icon: '📚', path: '/dashboard' },
-    { id: 'admin', label: 'Admin Settings', icon: '⚙️', path: '/admin', adminOnly: true },
+    { id: 'templates', label: 'Ready-Made Templates', icon: '⬡', path: '/?tab=templates' },
+    { id: 'new', label: 'AI Deck Creator', icon: '+', path: '/?tab=ai', primary: true },
+    { id: 'dashboard', label: 'All Decks', icon: '▤', path: '/dashboard' },
+    { id: 'admin', label: 'Admin Settings', icon: '⚙', path: '/admin', adminOnly: true },
   ];
 
   return (
@@ -110,7 +110,7 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}>
-                  <span style={{ fontSize: 15 }}>{item.icon}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>{item.icon}</span>
                   {!collapsed && <span>{item.label}</span>}
                 </div>
               </Link>
@@ -119,7 +119,7 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
 
           {!collapsed && (
             <div style={{ marginTop: 24, padding: '0 8px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', uppercase: 'true', letterSpacing: '0.05em', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                 TEMPLATES & STYLES
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -174,10 +174,10 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
               title="Sign Out"
               style={{
                 background: 'none', border: 'none', color: 'var(--text-subtle)',
-                cursor: 'pointer', fontSize: 14, padding: 4, borderRadius: 4,
+                cursor: 'pointer', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
               }}
             >
-              🚪
+              Exit
             </button>
           </div>
         )}
@@ -198,22 +198,13 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
           zIndex: 40,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>Deao Workspace</span>
+            <span>Workspace</span>
             <span>/</span>
             <span style={{ color: 'var(--text)', fontWeight: 600 }}>{title}</span>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{
-              fontSize: 11, padding: '2px 8px', borderRadius: 12,
-              background: 'rgba(16, 185, 129, 0.1)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.2)',
-            }}>
-              ● System Online
-            </span>
-          </div>
         </header>
 
-        {/* Page Content Body */}
+        {/* Page Content */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {children}
         </div>

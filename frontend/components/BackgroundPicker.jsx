@@ -15,7 +15,7 @@ export default function BackgroundPicker({ selectedId, onSelect, onClose }) {
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>🎨 Pre-Saved Slide Backgrounds</h3>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Pre-Saved Slide Backgrounds</h3>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
               Choose a curated backdrop preset for your pitch deck slides
             </p>
@@ -67,7 +67,7 @@ export default function BackgroundPicker({ selectedId, onSelect, onClose }) {
                       borderRadius: '50%', width: 20, height: 20,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 11, fontWeight: 800,
-                    }}>✓</div>
+                    }}>[v]</div>
                   )}
                 </div>
 

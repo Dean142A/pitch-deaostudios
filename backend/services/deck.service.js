@@ -439,7 +439,7 @@ async function recoverOrphanDecks(wss) {
 }
 
 module.exports = {
-  createDeck, generateDeck, getDeck, listDecks, updateSlide, deleteDeck,
-  saveVersion, getVersions, restoreVersion, getAiLogs, getDeckMetrics,
-  logExport, setDeckStatus, recoverOrphanDecks,
+  createDeck, generateDeck, getDeck, listDecks, addSlide, updateSlide, duplicateSlide,
+  deleteSlide, updateDeckTheme, deleteDeck, saveVersion, getVersions, restoreVersion,
+  getAiLogs, getDeckMetrics, logExport, setDeckStatus, recoverOrphanDecks,
 };

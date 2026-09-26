@@ -1,4 +1,4 @@
-// pages/deck/[deckId].jsx - Notion Block Canvas Deck Editor with Full Live Inline Editing
+// pages/deck/[deckId].jsx - Notion Block Canvas Deck Editor with Full Live Inline Editing & Drag-and-Drop Visual Studio
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -11,31 +11,23 @@ import api from '../../utils/api';
 const ChartComponent = dynamic(() => import('../../components/ChartComponent'), { ssr: false });
 
 const SLIDE_TYPES = [
-  { id: 'title', label: '🎯 Title / Hero' },
-  { id: 'problem', label: '⚡ Problem Statement' },
-  { id: 'solution', label: '✨ Solution' },
-  { id: 'product_demo', label: '🔬 Product & Tech' },
-  { id: 'market_size', label: '📊 Market Size (TAM)' },
-  { id: 'business_model', label: '💰 Business Model' },
-  { id: 'traction', label: '📈 Traction & ARR' },
-  { id: 'competitive_landscape', label: '🏆 Competitive Analysis' },
-  { id: 'go_to_market', label: '🚀 Go-To-Market' },
-  { id: 'team', label: '👥 Team & Advisors' },
-  { id: 'financials', label: '💵 Financial Projections' },
-  { id: 'funding_ask', label: '🎪 Investment Ask' },
-  { id: 'roadmap', label: '🗺️ Product Roadmap' },
-  { id: 'testimonials', label: '💬 Case Studies' },
-  { id: 'risk_mitigation', label: '🛡️ Risk Mitigation' },
-  { id: 'closing', label: '🎬 Closing / Contact' },
+  { id: 'title', label: 'Title / Hero' },
+  { id: 'problem', label: 'Problem Statement' },
+  { id: 'solution', label: 'Solution' },
+  { id: 'product_demo', label: 'Product & Tech' },
+  { id: 'market_size', label: 'Market Size (TAM)' },
+  { id: 'business_model', label: 'Business Model' },
+  { id: 'traction', label: 'Traction & ARR' },
+  { id: 'competitive_landscape', label: 'Competitive Analysis' },
+  { id: 'go_to_market', label: 'Go-To-Market' },
+  { id: 'team', label: 'Team & Advisors' },
+  { id: 'financials', label: 'Financial Projections' },
+  { id: 'funding_ask', label: 'Investment Ask' },
+  { id: 'roadmap', label: 'Product Roadmap' },
+  { id: 'testimonials', label: 'Case Studies' },
+  { id: 'risk_mitigation', label: 'Risk Mitigation' },
+  { id: 'closing', label: 'Closing / Contact' },
 ];
-
-const SLIDE_TYPE_ICONS = {
-  title: '🎯', problem: '⚡', solution: '✨', market_size: '📊',
-  business_model: '💰', traction: '📈', competitive_landscape: '🏆',
-  go_to_market: '🚀', team: '👥', financials: '💵', funding_ask: '🎪',
-  roadmap: '🗺️', closing: '🎬', product_demo: '🔬', testimonials: '💬',
-  risk_mitigation: '🛡️',
-};
 
 export default function DeckEditor() {
   const router = useRouter();
@@ -50,6 +42,7 @@ export default function DeckEditor() {
   const [showLogs, setShowLogs] = useState(false);
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showChartModal, setShowChartModal] = useState(false);
+  const [showFormatStudio, setShowFormatStudio] = useState(false);
   const [logs, setLogs] = useState([]);
   const [exportName, setExportName] = useState('');
   const [currentBgId, setCurrentBgId] = useState('dark-obsidian');
@@ -62,6 +55,9 @@ export default function DeckEditor() {
   const [slideChartData, setSlideChartData] = useState(null);
   const [slideType, setSlideType] = useState('title');
   const [slideLayout, setSlideLayout] = useState('single_column');
+
+  // Drag-and-Drop Active Tracking State
+  const [activeDrag, setActiveDrag] = useState(null);
 
   const wsRef = useRef(null);
   const pollRef = useRef(null);
@@ -207,7 +203,7 @@ export default function DeckEditor() {
     }, 600);
   }
 
-  // Helper mutations for content
+  // Helper mutations for content & positions
   const updateTitle = (val) => {
     const updated = { ...slideContent, title: val, headline: val };
     triggerSave(updated);
@@ -253,6 +249,65 @@ export default function DeckEditor() {
   const deleteMember = (idx) => {
     const members = (slideContent.members || []).filter((_, i) => i !== idx);
     triggerSave({ ...slideContent, members });
+  };
+
+  // ─── Custom Widgets Management ──────────────────────────────────────────────
+  const addWidget = (type) => {
+    const widgets = [...(slideContent.widgets || [])];
+    let newWidget = { id: `w_${Date.now()}`, type, x: 0, y: 0 };
+
+    if (type === 'stat_card') {
+      newWidget = { ...newWidget, value: '$10M+', label: 'Annual Recurring Revenue' };
+    } else if (type === 'text_box') {
+      newWidget = { ...newWidget, title: 'Custom Highlight Box', body: 'Add additional detailed notes, metrics, or custom container text here.' };
+    } else if (type === 'callout_box') {
+      newWidget = { ...newWidget, text: 'Custom Key Insight or Value Proposition Callout' };
+    } else if (type === 'bordered_container') {
+      newWidget = { ...newWidget, title: 'Bordered Container', content: 'Container block with custom border and fill' };
+    }
+
+    widgets.push(newWidget);
+    triggerSave({ ...slideContent, widgets });
+  };
+
+  const updateWidget = (id, field, val) => {
+    const widgets = (slideContent.widgets || []).map(w => w.id === id ? { ...w, [field]: val } : w);
+    triggerSave({ ...slideContent, widgets });
+  };
+
+  const deleteWidget = (id) => {
+    const widgets = (slideContent.widgets || []).filter(w => w.id !== id);
+    triggerSave({ ...slideContent, widgets });
+  };
+
+  // ─── Mouse Drag-and-Drop Handler ────────────────────────────────────────────
+  const handleDragStart = (e, itemKey) => {
+    e.stopPropagation();
+    const positions = slideContent.positions || {};
+    const currentPos = positions[itemKey] || { x: 0, y: 0 };
+    const startMouse = { x: e.clientX, y: e.clientY };
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startMouse.x;
+      const deltaY = moveEvent.clientY - startMouse.y;
+      const updatedPositions = {
+        ...(slideContent.positions || {}),
+        [itemKey]: { x: currentPos.x + deltaX, y: currentPos.y + deltaY },
+      };
+      setSlideContent(prev => ({ ...prev, positions: updatedPositions }));
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      setSlideContent(latest => {
+        triggerSave(latest);
+        return latest;
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
   };
 
   async function handleAddSlide() {
@@ -308,17 +363,6 @@ export default function DeckEditor() {
       setSelectedSlide(prev => Math.max(0, prev - 1));
     } catch (err) {
       alert(`Failed to delete slide: ${err.message}`);
-    }
-  }
-
-  async function retryGeneration() {
-    try {
-      setProgress({ status: 'generating', step: 1, total: 4, message: 'Restarting generation...' });
-      await api.retryDeck(deckId);
-      startPolling();
-      connectWebSocket();
-    } catch (err) {
-      alert(`Failed to restart generation: ${err.message}`);
     }
   }
 
@@ -378,6 +422,7 @@ export default function DeckEditor() {
   const bgPreset = getBackgroundPreset(currentBgId);
   const slideTitleVal = slideContent.title || slideContent.headline || slideContent.name || '';
   const slideSubtitleVal = slideContent.subtitle || slideContent.subheadline || slideContent.description || '';
+  const positions = slideContent.positions || {};
 
   if (!deck) return (
     <NotionLayout activeTab="dashboard" title="Loading Canvas...">
@@ -402,7 +447,7 @@ export default function DeckEditor() {
 
             {/* Save Status */}
             <span style={{ fontSize: 11, fontWeight: 600, color: savingStatus === 'saving' ? '#eab308' : (savingStatus === 'error' ? '#f43f5e' : '#10b981') }}>
-              {savingStatus === 'saving' ? '⏳ Saving...' : (savingStatus === 'error' ? '❌ Save Error' : '✓ Saved')}
+              {savingStatus === 'saving' ? 'Saving...' : (savingStatus === 'error' ? 'Save Error' : '[Saved]')}
             </span>
 
             {/* Active User Avatars */}
@@ -418,13 +463,26 @@ export default function DeckEditor() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Format Studio Toggle */}
+            <button
+              className="btn-secondary"
+              onClick={() => setShowFormatStudio(!showFormatStudio)}
+              style={{
+                fontSize: 12, padding: '5px 12px', fontWeight: 700,
+                background: showFormatStudio ? 'var(--accent)' : 'transparent',
+                color: showFormatStudio ? '#ffffff' : 'var(--text)',
+              }}
+            >
+              Design & Typography Studio
+            </button>
+
             {/* Background Picker */}
             <button
               className="btn-secondary"
               onClick={() => setShowBgPicker(true)}
               style={{ fontSize: 12, padding: '5px 12px' }}
             >
-              🎨 Theme: {bgPreset.name}
+              Theme: {bgPreset.name}
             </button>
 
             {/* Export Buttons */}
@@ -443,7 +501,7 @@ export default function DeckEditor() {
                   disabled={exporting}
                   style={{ fontSize: 12, padding: '5px 12px' }}
                 >
-                  ↓ PDF
+                  Download PDF
                 </button>
                 <button
                   className="btn-primary"
@@ -451,7 +509,7 @@ export default function DeckEditor() {
                   disabled={exporting}
                   style={{ fontSize: 12, padding: '5px 12px' }}
                 >
-                  ↓ PPTX
+                  Download PPTX
                 </button>
               </>
             )}
@@ -474,7 +532,7 @@ export default function DeckEditor() {
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', uppercase: 'true' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
                 SLIDES ({slides.length})
               </span>
               <button
@@ -489,7 +547,6 @@ export default function DeckEditor() {
             </div>
 
             {slides.map((s, idx) => {
-              const icon = SLIDE_TYPE_ICONS[s.slide_type] || '📄';
               const sContent = safeParseJSON(s.content, {});
               const isSelected = selectedSlide === idx;
               const sTitle = sContent?.title || sContent?.headline || `Slide ${idx + 1}`;
@@ -510,7 +567,7 @@ export default function DeckEditor() {
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: bgPreset.style.color }}>
-                    <span>{idx + 1}. {icon}</span>
+                    <span>Slide {idx + 1}</span>
                     <span style={{ textTransform: 'capitalize', opacity: 0.8 }}>{s.slide_type?.replace(/_/g, ' ')}</span>
                   </div>
                   <div style={{
@@ -528,18 +585,21 @@ export default function DeckEditor() {
           <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {currentSlide ? (
               <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Figma Visual Typography & Color Studio Toolbar */}
-                <FigmaTypographyToolbar
-                  currentTheme={visualTheme}
-                  onChangeTheme={theme => setVisualTheme(theme)}
-                  onSaveGlobalTheme={handleSaveGlobalTheme}
-                />
+                {/* Collapsible Figma Visual Typography & Color Studio Toolbar */}
+                {showFormatStudio && (
+                  <FigmaTypographyToolbar
+                    currentTheme={visualTheme}
+                    onChangeTheme={theme => setVisualTheme(theme)}
+                    onSaveGlobalTheme={handleSaveGlobalTheme}
+                    onClose={() => setShowFormatStudio(false)}
+                  />
+                )}
 
-                {/* Slide Action Bar (Type Selector, Layout & Delete) */}
+                {/* Slide Action Bar */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   background: 'var(--bg-card)', border: '1px solid var(--border)',
-                  borderRadius: 8, padding: '8px 16px', gap: 12,
+                  borderRadius: 8, padding: '8px 16px', gap: 12, flexWrap: 'wrap',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>SLIDE TYPE:</span>
@@ -562,8 +622,17 @@ export default function DeckEditor() {
                       onClick={() => setShowChartModal(true)}
                       style={{ fontSize: 12, padding: '4px 10px' }}
                     >
-                      📊 Edit Chart Data {slideChartData ? '✓' : ''}
+                      Edit Chart Data {slideChartData ? '[v]' : ''}
                     </button>
+
+                    {/* Add Widget Dropdown */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)' }}>+ WIDGET:</span>
+                      <button className="btn-secondary" onClick={() => addWidget('stat_card')} style={{ fontSize: 11, padding: '3px 8px' }}>Stat Card</button>
+                      <button className="btn-secondary" onClick={() => addWidget('text_box')} style={{ fontSize: 11, padding: '3px 8px' }}>Text Box</button>
+                      <button className="btn-secondary" onClick={() => addWidget('callout_box')} style={{ fontSize: 11, padding: '3px 8px' }}>Callout</button>
+                      <button className="btn-secondary" onClick={() => addWidget('bordered_container')} style={{ fontSize: 11, padding: '3px 8px' }}>Border Container</button>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -572,7 +641,7 @@ export default function DeckEditor() {
                       onClick={() => persistSlide(slideContent, slideChartData, slideType, slideLayout)}
                       style={{ fontSize: 12, padding: '4px 12px', fontWeight: 700 }}
                     >
-                      💾 Save Changes
+                      Save Changes
                     </button>
 
                     <button
@@ -580,7 +649,7 @@ export default function DeckEditor() {
                       onClick={handleDuplicateSlide}
                       style={{ fontSize: 12, padding: '4px 10px' }}
                     >
-                      📋 Duplicate Slide
+                      Duplicate Slide
                     </button>
 
                     <button
@@ -591,12 +660,12 @@ export default function DeckEditor() {
                         fontSize: 12, padding: '4px 10px', cursor: 'pointer',
                       }}
                     >
-                      🗑️ Delete
+                      Delete
                     </button>
                   </div>
                 </div>
 
-                {/* Presentation Canvas Box */}
+                {/* Presentation Canvas Box (Fully Visually Positionable & Border-Customizable) */}
                 <div style={{
                   width: '100%', minHeight: 480,
                   background: visualTheme.bgColor || bgPreset.style.background,
@@ -604,21 +673,39 @@ export default function DeckEditor() {
                   backgroundSize: bgPreset.style.backgroundSize || 'cover',
                   color: visualTheme.textColor || '#ffffff',
                   fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
-                  borderRadius: 14, border: `1px solid ${bgPreset.style.border}`,
+                  borderRadius: visualTheme.borderRadius || '14px',
+                  border: visualTheme.borderEnabled !== false
+                    ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || bgPreset.style.border}`
+                    : 'none',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
                   padding: '40px 48px', display: 'flex', flexDirection: 'column',
-                  justifyContent: 'space-between', position: 'relative', transition: 'all 0.2s ease',
+                  justifyContent: 'space-between', position: 'relative', transition: 'background 0.2s ease',
                 }}>
                   {/* Left Accent Bar */}
                   <div style={{
                     position: 'absolute', top: 0, left: 0, bottom: 0, width: 6,
-                    background: visualTheme.accentColor || bgPreset.style.accent, borderTopLeftRadius: 14, borderBottomLeftRadius: 14,
+                    background: visualTheme.accentColor || bgPreset.style.accent,
+                    borderTopLeftRadius: visualTheme.borderRadius || '14px',
+                    borderBottomLeftRadius: visualTheme.borderRadius || '14px',
                   }} />
 
-                  <div>
+                  {/* Header / Title Draggable Group */}
+                  <div style={{
+                    transform: `translate(${positions.title_group?.x || 0}px, ${positions.title_group?.y || 0}px)`,
+                    position: 'relative', transition: activeDrag === 'title_group' ? 'none' : 'transform 0.1s ease',
+                  }}>
+                    <div
+                      onMouseDown={e => handleDragStart(e, 'title_group')}
+                      style={{
+                        cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)',
+                        letterSpacing: '0.1em', uppercase: 'true', marginBottom: 4, display: 'inline-block',
+                      }}
+                    >
+                      ::: DRAG TITLE BLOCK
+                    </div>
+
                     {/* Slide Type Tag */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 18 }}>{SLIDE_TYPE_ICONS[slideType] || '📄'}</span>
                       <span style={{
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
                         background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: 4,
@@ -669,8 +756,21 @@ export default function DeckEditor() {
                     display: 'grid', gridTemplateColumns: slideChartData && slideChartData.type !== 'none' ? '1fr 1fr' : '1fr',
                     gap: 24, flex: 1, margin: '16px 0',
                   }}>
-                    {/* Left Column: Bullets / Body / Members */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* Left Column: Bullets / Members / Widgets */}
+                    <div style={{
+                      transform: `translate(${positions.body_group?.x || 0}px, ${positions.body_group?.y || 0}px)`,
+                      display: 'flex', flexDirection: 'column', gap: 12, position: 'relative',
+                    }}>
+                      <div
+                        onMouseDown={e => handleDragStart(e, 'body_group')}
+                        style={{
+                          cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)',
+                          letterSpacing: '0.1em', marginBottom: 2, display: 'inline-block',
+                        }}
+                      >
+                        ::: DRAG CONTENT SECTION
+                      </div>
+
                       {/* Editable Bullets */}
                       {slideContent.bullets && slideContent.bullets.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -723,8 +823,9 @@ export default function DeckEditor() {
                           </div>
                           {slideContent.members.map((m, mi) => (
                             <div key={mi} style={{
-                              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
-                              borderRadius: 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 6,
+                              background: visualTheme.containerBg || 'rgba(255,255,255,0.06)',
+                              border: visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.15)'}` : 'none',
+                              borderRadius: visualTheme.borderRadius || 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 6,
                             }}>
                               <div style={{ display: 'flex', gap: 8 }}>
                                 <input
@@ -779,22 +880,115 @@ export default function DeckEditor() {
                             width: '100%',
                             background: visualTheme.accentColor ? `${visualTheme.accentColor}22` : 'rgba(14, 165, 233, 0.15)',
                             border: `1px solid ${visualTheme.accentColor ? `${visualTheme.accentColor}66` : 'rgba(14, 165, 233, 0.4)'}`,
-                            borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600,
+                            borderRadius: visualTheme.borderRadius || 8, padding: '8px 12px', fontSize: 12, fontWeight: 600,
                             color: visualTheme.accentColor || '#38bdf8', outline: 'none',
                             fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
                           }}
                         />
                       </div>
+
+                      {/* Render Custom Draggable Widgets */}
+                      {slideContent.widgets && slideContent.widgets.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
+                          {slideContent.widgets.map((w) => {
+                            const pos = positions[w.id] || { x: 0, y: 0 };
+                            return (
+                              <div
+                                key={w.id}
+                                style={{
+                                  transform: `translate(${pos.x}px, ${pos.y}px)`,
+                                  background: visualTheme.containerBg || 'rgba(255,255,255,0.06)',
+                                  border: visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.2)'}` : 'none',
+                                  borderRadius: visualTheme.borderRadius || 8, padding: 12, position: 'relative',
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                  <span onMouseDown={e => handleDragStart(e, w.id)} style={{ cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>
+                                    ::: DRAG WIDGET ({w.type.toUpperCase()})
+                                  </span>
+                                  <button onClick={() => deleteWidget(w.id)} style={{ background: 'none', border: 'none', color: '#f43f5e', cursor: 'pointer', fontSize: 12 }}>✕</button>
+                                </div>
+
+                                {w.type === 'stat_card' && (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <input
+                                      value={w.value || ''}
+                                      onChange={e => updateWidget(w.id, 'value', e.target.value)}
+                                      placeholder="Stat Value (e.g. $10M+)"
+                                      style={{ background: 'transparent', border: 'none', fontSize: 24, fontWeight: 800, color: visualTheme.accentColor || '#38bdf8', outline: 'none' }}
+                                    />
+                                    <input
+                                      value={w.label || ''}
+                                      onChange={e => updateWidget(w.id, 'label', e.target.value)}
+                                      placeholder="Stat Label"
+                                      style={{ background: 'transparent', border: 'none', fontSize: 12, color: visualTheme.textColor || '#fff', outline: 'none' }}
+                                    />
+                                  </div>
+                                )}
+
+                                {w.type === 'text_box' && (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <input
+                                      value={w.title || ''}
+                                      onChange={e => updateWidget(w.id, 'title', e.target.value)}
+                                      placeholder="Box Header"
+                                      style={{ background: 'transparent', border: 'none', fontSize: 14, fontWeight: 700, color: visualTheme.titleColor || '#fff', outline: 'none' }}
+                                    />
+                                    <textarea
+                                      rows={2}
+                                      value={w.body || ''}
+                                      onChange={e => updateWidget(w.id, 'body', e.target.value)}
+                                      placeholder="Box paragraph body..."
+                                      style={{ background: 'transparent', border: 'none', fontSize: 12, color: visualTheme.textColor || '#e2e8f0', outline: 'none', resize: 'vertical' }}
+                                    />
+                                  </div>
+                                )}
+
+                                {w.type === 'callout_box' && (
+                                  <input
+                                    value={w.text || ''}
+                                    onChange={e => updateWidget(w.id, 'text', e.target.value)}
+                                    placeholder="Callout Highlight text..."
+                                    style={{ width: '100%', background: 'transparent', border: 'none', fontSize: 12, fontWeight: 600, color: visualTheme.accentColor || '#38bdf8', outline: 'none' }}
+                                  />
+                                )}
+
+                                {w.type === 'bordered_container' && (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <input
+                                      value={w.title || ''}
+                                      onChange={e => updateWidget(w.id, 'title', e.target.value)}
+                                      placeholder="Container Header"
+                                      style={{ background: 'transparent', border: 'none', fontSize: 13, fontWeight: 700, color: visualTheme.titleColor || '#fff', outline: 'none' }}
+                                    />
+                                    <input
+                                      value={w.content || ''}
+                                      onChange={e => updateWidget(w.id, 'content', e.target.value)}
+                                      placeholder="Container content body"
+                                      style={{ background: 'transparent', border: 'none', fontSize: 12, color: visualTheme.textColor || '#fff', outline: 'none' }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Right Column: Interactive Chart Preview */}
+                    {/* Right Column: Interactive Chart Preview (Draggable) */}
                     {slideChartData && slideChartData.type !== 'none' && (
                       <div style={{
-                        background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
-                        borderRadius: 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column',
+                        transform: `translate(${positions.chart_group?.x || 0}px, ${positions.chart_group?.y || 0}px)`,
+                        background: 'rgba(0,0,0,0.4)',
+                        border: visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.15)'}` : 'none',
+                        borderRadius: visualTheme.borderRadius || 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column', position: 'relative',
                       }}>
+                        <div onMouseDown={e => handleDragStart(e, 'chart_group')} style={{ cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
+                          ::: DRAG CHART
+                        </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: visualTheme.accentColor || '#38bdf8' }}>📊 {slideChartData.title || 'Chart'}</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: visualTheme.accentColor || '#38bdf8' }}>Chart: {slideChartData.title || 'Performance'}</span>
                           <button className="btn-secondary" onClick={() => setShowChartModal(true)} style={{ fontSize: 10, padding: '2px 6px' }}>Edit Chart</button>
                         </div>
                         <div style={{ flex: 1, position: 'relative' }}>
@@ -825,7 +1019,7 @@ export default function DeckEditor() {
 
       {/* Chart Editor Modal */}
       {showChartModal && (
-        <Modal title="📊 Edit Slide Chart Data" onClose={() => setShowChartModal(false)} wide>
+        <Modal title="Edit Slide Chart Data" onClose={() => setShowChartModal(false)} wide>
           <ChartEditorDrawer
             chartData={slideChartData}
             onSave={(newChart) => {

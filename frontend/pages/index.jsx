@@ -68,7 +68,6 @@ export default function Home() {
       <div style={{ maxWidth: creationMode === 'templates' ? 1100 : 780, margin: '0 auto', padding: '36px 24px', transition: 'max-width 0.3s ease' }}>
         {/* Header callout */}
         <div className="notion-callout" style={{ marginBottom: 24 }}>
-          <span style={{ fontSize: 24 }}>✨</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
               Deao Studios Pitch Deck Creator
@@ -96,7 +95,7 @@ export default function Home() {
               transition: 'all 0.15s ease',
             }}
           >
-            <span>🎨</span> Ready-Made Templates
+            Ready-Made Templates
           </button>
 
           <button
@@ -110,7 +109,7 @@ export default function Home() {
               transition: 'all 0.15s ease',
             }}
           >
-            <span>✨</span> Generate with AI Prompt
+            Generate with AI Prompt
           </button>
         </div>
 
@@ -144,7 +143,7 @@ export default function Home() {
                       color: active ? 'var(--accent)' : (completed ? '#34d399' : 'var(--text-muted)'),
                     }}
                   >
-                    <span>{completed ? '✓' : stepNum + '.'}</span>
+                    <span>{completed ? '[v]' : stepNum + '.'}</span>
                     <span>{label.replace(/^\d+\.\s*/, '')}</span>
                   </div>
                 );
@@ -154,8 +153,8 @@ export default function Home() {
         {/* Step 1 */}
         {step === 1 && (
           <div className="notion-card">
-            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>🏢</span> Company Profile
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
+              Company Profile
             </h2>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -203,7 +202,7 @@ export default function Home() {
                   onChange={e => setLogoFile(e.target.files[0])} />
                 <label htmlFor="logo-input" style={{ cursor: 'pointer', color: 'var(--text-muted)', margin: 0 }}>
                   {logoFile ? (
-                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>✓ {logoFile.name}</span>
+                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>[v] {logoFile.name}</span>
                   ) : (
                     <span>Drop logo here or <span style={{ color: 'var(--accent)' }}>browse file</span></span>
                   )}
@@ -222,8 +221,8 @@ export default function Home() {
         {/* Step 2 */}
         {step === 2 && (
           <div className="notion-card">
-            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>🎯</span> Market, Traction & Funding
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
+              Market, Traction & Funding
             </h2>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -275,8 +274,8 @@ export default function Home() {
         {/* Step 3 */}
         {step === 3 && (
           <div className="notion-card">
-            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>🎨</span> Theme & Pre-Saved Background
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
+              Theme & Pre-Saved Background
             </h2>
 
             {/* Visual Style Selection */}
@@ -342,7 +341,7 @@ export default function Home() {
               background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
               borderRadius: 8, padding: '14px 18px', marginBottom: 24,
             }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', uppercase: 'true', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', marginBottom: 8 }}>
                 SUMMARY
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 12 }}>
@@ -371,7 +370,7 @@ export default function Home() {
                     Generating Deck...
                   </>
                 ) : (
-                  '🚀 Generate Pitch Deck'
+                  'Generate Pitch Deck'
                 )}
               </button>
             </div>

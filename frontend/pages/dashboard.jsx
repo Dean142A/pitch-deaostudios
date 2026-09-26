@@ -64,13 +64,13 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
               <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>🎨</span> Browse Templates
+                Browse Templates
               </button>
             </Link>
 
             <Link href="/" style={{ textDecoration: 'none' }}>
               <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>+</span> New Pitch Deck
+                + New Pitch Deck
               </button>
             </Link>
           </div>
@@ -83,7 +83,7 @@ export default function Dashboard() {
           borderRadius: 8, padding: '10px 16px', marginBottom: 24, gap: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <span style={{ fontSize: 14, color: 'var(--text-subtle)' }}>🔍</span>
+            <span style={{ fontSize: 13, color: 'var(--text-subtle)', fontWeight: 700 }}>Search:</span>
             <input
               className="input"
               style={{ border: 'none', background: 'transparent', padding: 0 }}
@@ -119,7 +119,6 @@ export default function Dashboard() {
             background: 'var(--bg-card)', border: '1px dashed var(--border)',
             borderRadius: 12,
           }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>📚</div>
             <h3 style={{ margin: '0 0 6px', fontSize: 16, color: 'var(--text)' }}>No decks found</h3>
             <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--text-muted)' }}>
               {search || filterStatus !== 'all' ? 'Try adjusting your search or filters' : 'Create your first pitch deck using AI'}
@@ -162,7 +161,7 @@ export default function Dashboard() {
                         background: 'rgba(0, 0, 0, 0.5)', color: preset.style.color,
                         backdropFilter: 'blur(4px)', border: `1px solid ${preset.style.border}`,
                       }}>
-                        🎨 {preset.name}
+                        {preset.name}
                       </span>
                       <span className={`badge badge-${deck.status}`}>
                         {deck.status}
@@ -181,9 +180,9 @@ export default function Dashboard() {
                   <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-                        <span>📊 {deck.slide_count || deck.num_slides || 15} slides</span>
+                        <span>{deck.slide_count || deck.num_slides || 15} slides</span>
                         <span>•</span>
-                        <span>👤 {deck.owner_name || 'Owner'}</span>
+                        <span>{deck.owner_name || 'Owner'}</span>
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
                         Created {new Date(deck.created_at || deck.updated_at).toLocaleDateString()}
@@ -202,12 +201,12 @@ export default function Dashboard() {
                         title="Delete Deck"
                         style={{
                           background: 'none', border: 'none', color: 'var(--text-subtle)',
-                          cursor: 'pointer', fontSize: 13, padding: 4, borderRadius: 4,
+                          cursor: 'pointer', fontSize: 12, fontWeight: 700, padding: 4, borderRadius: 4,
                         }}
                         onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
                         onMouseLeave={e => e.currentTarget.style.color = 'var(--text-subtle)'}
                       >
-                        🗑️
+                        Delete
                       </button>
                     </div>
                   </div>
