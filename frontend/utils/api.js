@@ -55,6 +55,7 @@ const api = {
   // Slides & Theme
   addSlide: (deckId, data = {}) => request('POST', `/api/decks/${deckId}/slides`, data),
   duplicateSlide: (deckId, slideId) => request('POST', `/api/decks/${deckId}/slides/${slideId}/duplicate`),
+  reorderSlides: (deckId, orderedSlideIds) => request('PUT', `/api/decks/${deckId}/slides/reorder`, { orderedSlideIds }),
   updateSlide: (deckId, slideId, data) => request('PUT', `/api/decks/${deckId}/slides/${slideId}`, data),
   deleteSlide: (deckId, slideId) => request('DELETE', `/api/decks/${deckId}/slides/${slideId}`),
   updateDeckTheme: (deckId, globalTheme) => request('PUT', `/api/decks/${deckId}/theme`, globalTheme),

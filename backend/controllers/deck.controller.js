@@ -250,7 +250,19 @@ async function retryDeck(req, res) {
   }
 }
 
+async function reorderSlides(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId)) return res.status(400).json({ error: 'Invalid deck ID' });
+    const { orderedSlideIds } = req.body;
+    if (!Array.isArray(orderedSlideIds)) return res.status(400).json({ error: 'orderedSlideIds array required' });
+    const slides = await deckService.reorderSlides(req.params.deckId, orderedSlideIds, req.user.userId);
+    res.json(slides);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to reorder slides' });
+  }
+}
+
 module.exports = {
-  createDeck, getDeck, listDecks, updateSlide, addSlide, duplicateSlide, deleteSlide, deleteDeck,
+  createDeck, getDeck, listDecks, updateSlide, addSlide, duplicateSlide, reorderSlides, deleteSlide, deleteDeck,
   updateDeckTheme, getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics, retryDeck,
 };

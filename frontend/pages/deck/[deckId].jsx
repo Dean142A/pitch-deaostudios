@@ -1,4 +1,4 @@
-// pages/deck/[deckId].jsx - Notion Block Canvas Deck Editor with Full Live Inline Editing & Drag-and-Drop Visual Studio
+// pages/deck/[deckId].jsx - Notion Block Canvas Deck Editor with Full Live Inline Editing, Drag-and-Drop Visual Studio & Slide Reordering
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -50,13 +50,18 @@ export default function DeckEditor() {
   const [savingStatus, setSavingStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
   const [visualTheme, setVisualTheme] = useState({});
 
+  // Slide Reordering Drag State
+  const [draggedSlideIdx, setDraggedSlideIdx] = useState(null);
+  // Right Click Context Menu State
+  const [contextMenu, setContextMenu] = useState(null);
+
   // Local Editable State for Current Active Slide
   const [slideContent, setSlideContent] = useState({});
   const [slideChartData, setSlideChartData] = useState(null);
   const [slideType, setSlideType] = useState('title');
   const [slideLayout, setSlideLayout] = useState('single_column');
 
-  // Drag-and-Drop Active Tracking State
+  // Drag-and-Drop Active Tracking State for Canvas Elements
   const [activeDrag, setActiveDrag] = useState(null);
 
   const wsRef = useRef(null);
@@ -72,6 +77,13 @@ export default function DeckEditor() {
     clearInterval(pollRef.current);
     clearTimeout(saveTimerRef.current);
     wsRef.current?.close();
+  }, []);
+
+  // Close context menu on outside click
+  useEffect(() => {
+    const handleOutsideClick = () => setContextMenu(null);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
   }, []);
 
   // Update local editable buffers whenever selected slide changes
@@ -280,7 +292,7 @@ export default function DeckEditor() {
     triggerSave({ ...slideContent, widgets });
   };
 
-  // ─── Mouse Drag-and-Drop Handler ────────────────────────────────────────────
+  // ─── Mouse Drag-and-Drop Handler for Canvas Elements ────────────────────────
   const handleDragStart = (e, itemKey) => {
     e.stopPropagation();
     const positions = slideContent.positions || {};
@@ -308,6 +320,108 @@ export default function DeckEditor() {
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // ─── Slide Reordering Drag & Drop Handlers ──────────────────────────────────
+  const handleSlideDragStart = (e, idx) => {
+    setDraggedSlideIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSlideDragOver = (e, idx) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleSlideDrop = async (e, targetIdx) => {
+    e.preventDefault();
+    if (draggedSlideIdx === null || draggedSlideIdx === targetIdx) return;
+
+    const reordered = [...slides];
+    const [removed] = reordered.splice(draggedSlideIdx, 1);
+    reordered.splice(targetIdx, 0, removed);
+
+    setSlides(reordered);
+    setSelectedSlide(targetIdx);
+    setDraggedSlideIdx(null);
+
+    try {
+      const orderedIds = reordered.map(s => s.id);
+      await api.reorderSlides(deckId, orderedIds);
+    } catch (err) {
+      console.error('Failed to save slide order:', err);
+    }
+  };
+
+  // ─── Right Click Context Menu Handlers ─────────────────────────────────────
+  const handleContextMenu = (e, idx, slideId) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      slideIdx: idx,
+      slideId: slideId,
+    });
+  };
+
+  const handleContextDuplicate = async () => {
+    if (!contextMenu) return;
+    const targetId = contextMenu.slideId;
+    const targetIdx = contextMenu.slideIdx;
+    setContextMenu(null);
+    try {
+      const duplicated = await api.duplicateSlide(deckId, targetId);
+      setSlides(prev => {
+        const next = [...prev];
+        next.splice(targetIdx + 1, 0, duplicated);
+        return next;
+      });
+      setSelectedSlide(targetIdx + 1);
+    } catch (err) {
+      alert(`Failed to duplicate slide: ${err.message}`);
+    }
+  };
+
+  const handleContextMove = async (direction) => {
+    if (!contextMenu) return;
+    const fromIdx = contextMenu.slideIdx;
+    const toIdx = direction === 'up' ? fromIdx - 1 : fromIdx + 1;
+    setContextMenu(null);
+    if (toIdx < 0 || toIdx >= slides.length) return;
+
+    const reordered = [...slides];
+    const [removed] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, removed);
+
+    setSlides(reordered);
+    setSelectedSlide(toIdx);
+
+    try {
+      await api.reorderSlides(deckId, reordered.map(s => s.id));
+    } catch (err) {
+      console.error('Failed to move slide:', err);
+    }
+  };
+
+  const handleContextDelete = async () => {
+    if (!contextMenu) return;
+    const targetIdx = contextMenu.slideIdx;
+    const targetId = contextMenu.slideId;
+    setContextMenu(null);
+
+    if (slides.length <= 1) {
+      alert('Deck must contain at least one slide');
+      return;
+    }
+    if (!confirm('Are you sure you want to delete this slide?')) return;
+
+    try {
+      await api.deleteSlide(deckId, targetId);
+      setSlides(prev => prev.filter((_, idx) => idx !== targetIdx));
+      setSelectedSlide(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      alert(`Failed to delete slide: ${err.message}`);
+    }
   };
 
   async function handleAddSlide() {
@@ -525,7 +639,7 @@ export default function DeckEditor() {
 
         {/* Editor Main Stage */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Left Slide Thumbnails Sidebar */}
+          {/* Left Slide Thumbnails Sidebar (Draggable Reorder & Visual Fidelity) */}
           <div style={{
             width: 240, background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border)',
             overflowY: 'auto', padding: 14, display: 'flex', flexDirection: 'column', gap: 10,
@@ -550,32 +664,64 @@ export default function DeckEditor() {
               const sContent = safeParseJSON(s.content, {});
               const isSelected = selectedSlide === idx;
               const sTitle = sContent?.title || sContent?.headline || `Slide ${idx + 1}`;
+              const sSubtitle = sContent?.subtitle || sContent?.subheadline || '';
 
               return (
                 <div
                   key={s.id || idx}
+                  draggable={true}
+                  onDragStart={e => handleSlideDragStart(e, idx)}
+                  onDragOver={e => handleSlideDragOver(e, idx)}
+                  onDrop={e => handleSlideDrop(e, idx)}
+                  onContextMenu={e => handleContextMenu(e, idx, s.id)}
                   onClick={() => setSelectedSlide(idx)}
                   style={{
-                    background: bgPreset.style.background,
-                    backgroundImage: bgPreset.style.backgroundImage,
+                    background: visualTheme.bgColor || bgPreset.style.background,
+                    backgroundImage: visualTheme.bgColor ? 'none' : bgPreset.style.backgroundImage,
                     backgroundSize: bgPreset.style.backgroundSize || 'cover',
-                    padding: 10, borderRadius: 8, cursor: 'pointer',
+                    padding: 10, borderRadius: 8, cursor: 'grab',
                     display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                    border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    border: isSelected ? '2px solid var(--accent)' : `1px solid ${bgPreset.style.border}`,
                     boxShadow: isSelected ? '0 0 10px rgba(99,102,241,0.4)' : 'none',
-                    transition: 'all 0.15s ease',
+                    opacity: draggedSlideIdx === idx ? 0.4 : 1,
+                    transition: 'all 0.15s ease', position: 'relative',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: bgPreset.style.color }}>
-                    <span>Slide {idx + 1}</span>
+                  {/* Left Accent Bar on Thumbnail */}
+                  <div style={{
+                    position: 'absolute', top: 0, left: 0, bottom: 0, width: 4,
+                    background: visualTheme.accentColor || bgPreset.style.accent,
+                    borderTopLeftRadius: 8, borderBottomLeftRadius: 8,
+                  }} />
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: visualTheme.titleColor || bgPreset.style.color, paddingLeft: 6 }}>
+                    <span style={{ fontWeight: 700 }}>Slide {idx + 1}</span>
                     <span style={{ textTransform: 'capitalize', opacity: 0.8 }}>{s.slide_type?.replace(/_/g, ' ')}</span>
                   </div>
+
                   <div style={{
-                    fontSize: 11, fontWeight: 700, color: bgPreset.style.color,
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 6,
+                    fontSize: 11, fontWeight: 700, color: visualTheme.titleColor || bgPreset.style.color,
+                    fontFamily: visualTheme.headingFont ? `'${visualTheme.headingFont}', sans-serif` : 'inherit',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 6, paddingLeft: 6,
                   }}>
                     {sTitle}
                   </div>
+
+                  {sSubtitle && (
+                    <div style={{
+                      fontSize: 10, color: visualTheme.textColor || 'rgba(255,255,255,0.7)',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2, paddingLeft: 6, opacity: 0.85,
+                    }}>
+                      {sSubtitle}
+                    </div>
+                  )}
+
+                  {/* Widget Indicators Badge */}
+                  {sContent.widgets && sContent.widgets.length > 0 && (
+                    <div style={{ fontSize: 9, fontWeight: 700, color: visualTheme.accentColor || 'var(--accent)', marginTop: 4, paddingLeft: 6 }}>
+                      [{sContent.widgets.length} Widget{sContent.widgets.length > 1 ? 's' : ''}]
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -679,7 +825,7 @@ export default function DeckEditor() {
                     : 'none',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
                   padding: '40px 48px', display: 'flex', flexDirection: 'column',
-                  justifyContent: 'space-between', position: 'relative', transition: 'background 0.2s ease',
+                  justify: 'space-between', position: 'relative', transition: 'background 0.2s ease',
                 }}>
                   {/* Left Accent Bar */}
                   <div style={{
@@ -698,7 +844,7 @@ export default function DeckEditor() {
                       onMouseDown={e => handleDragStart(e, 'title_group')}
                       style={{
                         cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)',
-                        letterSpacing: '0.1em', uppercase: 'true', marginBottom: 4, display: 'inline-block',
+                        letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4, display: 'inline-block',
                       }}
                     >
                       ::: DRAG TITLE BLOCK
@@ -1016,6 +1162,70 @@ export default function DeckEditor() {
           </div>
         </div>
       </div>
+
+      {/* Floating Right Click Context Menu for Slide Thumbnails */}
+      {contextMenu && (
+        <div style={{
+          position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 2000,
+          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          borderRadius: 8, padding: '6px 0', width: 170,
+          boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+        }} onClick={e => e.stopPropagation()}>
+          <button
+            onClick={handleContextDuplicate}
+            style={{
+              width: '100%', textAlign: 'left', padding: '6px 14px', background: 'transparent',
+              border: 'none', color: 'var(--text)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Duplicate Slide
+          </button>
+
+          <button
+            onClick={() => handleContextMove('up')}
+            disabled={contextMenu.slideIdx === 0}
+            style={{
+              width: '100%', textAlign: 'left', padding: '6px 14px', background: 'transparent',
+              border: 'none', color: contextMenu.slideIdx === 0 ? 'var(--text-subtle)' : 'var(--text)',
+              fontSize: 12, cursor: contextMenu.slideIdx === 0 ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={e => contextMenu.slideIdx !== 0 && (e.currentTarget.style.background = 'var(--bg-hover)')}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Move Slide Up
+          </button>
+
+          <button
+            onClick={() => handleContextMove('down')}
+            disabled={contextMenu.slideIdx === slides.length - 1}
+            style={{
+              width: '100%', textAlign: 'left', padding: '6px 14px', background: 'transparent',
+              border: 'none', color: contextMenu.slideIdx === slides.length - 1 ? 'var(--text-subtle)' : 'var(--text)',
+              fontSize: 12, cursor: contextMenu.slideIdx === slides.length - 1 ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={e => contextMenu.slideIdx !== slides.length - 1 && (e.currentTarget.style.background = 'var(--bg-hover)')}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Move Slide Down
+          </button>
+
+          <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+
+          <button
+            onClick={handleContextDelete}
+            style={{
+              width: '100%', textAlign: 'left', padding: '6px 14px', background: 'transparent',
+              border: 'none', color: '#f43f5e', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Delete Slide
+          </button>
+        </div>
+      )}
 
       {/* Chart Editor Modal */}
       {showChartModal && (

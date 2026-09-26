@@ -438,8 +438,37 @@ async function recoverOrphanDecks(wss) {
   }
 }
 
+async function reorderSlides(deckId, orderedSlideIds, userId) {
+  const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
+  if (!deck.rows[0]) throw new Error('Deck not found');
+  if (deck.rows[0].owner_id !== userId) throw new Error('Forbidden: not deck owner');
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (let i = 0; i < orderedSlideIds.length; i++) {
+      await client.query(
+        `UPDATE slides SET slide_order = $1 WHERE id = $2 AND deck_id = $3`,
+        [i, orderedSlideIds[i], deckId]
+      );
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+
+  const updatedSlides = await pool.query(
+    `SELECT * FROM slides WHERE deck_id = $1 ORDER BY slide_order ASC`,
+    [deckId]
+  );
+  return updatedSlides.rows;
+}
+
 module.exports = {
   createDeck, generateDeck, getDeck, listDecks, addSlide, updateSlide, duplicateSlide,
-  deleteSlide, updateDeckTheme, deleteDeck, saveVersion, getVersions, restoreVersion,
+  reorderSlides, deleteSlide, updateDeckTheme, deleteDeck, saveVersion, getVersions, restoreVersion,
   getAiLogs, getDeckMetrics, logExport, setDeckStatus, recoverOrphanDecks,
 };
