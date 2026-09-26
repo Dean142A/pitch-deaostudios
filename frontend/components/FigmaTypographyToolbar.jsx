@@ -1,5 +1,5 @@
 // frontend/components/FigmaTypographyToolbar.jsx
-// Figma-Style Typography & Visual Styling Toolbar for Deao Studios Pitch Generator
+// Figma-Style Typography & Visual Styling Studio Inspector
 import { useState, useEffect } from 'react';
 
 const GOOGLE_FONTS = [
@@ -37,6 +37,7 @@ export default function FigmaTypographyToolbar({
   onChangeTheme,
   onSaveGlobalTheme,
   onClose,
+  isSidebar = false,
 }) {
   const [headingFont, setHeadingFont] = useState(currentTheme.headingFont || 'Syne');
   const [bodyFont, setBodyFont] = useState(currentTheme.bodyFont || 'DM Sans');
@@ -57,7 +58,8 @@ export default function FigmaTypographyToolbar({
   const [borderRadius, setBorderRadius] = useState(currentTheme.borderRadius || '12px');
   const [containerBg, setContainerBg] = useState(currentTheme.containerBg || 'rgba(255,255,255,0.04)');
 
-  const [activeTab, setActiveTab] = useState('text'); // 'text' | 'colors' | 'borders' | 'global'
+  // Accordion Section States for Sidebar Inspector Mode
+  const [openSection, setOpenSection] = useState('text'); // 'text' | 'colors' | 'borders' | 'global'
   const [savingGlobal, setSavingGlobal] = useState(false);
 
   // Dynamically inject selected Google Fonts into page head
@@ -108,7 +110,7 @@ export default function FigmaTypographyToolbar({
         borderEnabled, borderWidth, borderStyle, borderColor, borderRadius, containerBg,
       };
       await onSaveGlobalTheme(themeObj);
-      alert('[Saved] Global Fonts & Colors saved to deck successfully!');
+      alert('[Saved] Global Deck Theme saved to database!');
     } catch (err) {
       alert(`Failed to save global theme: ${err.message}`);
     } finally {
@@ -116,265 +118,288 @@ export default function FigmaTypographyToolbar({
     }
   }
 
+  const containerStyle = isSidebar ? {
+    width: 280, background: 'var(--bg-card)', borderLeft: '1px solid var(--border)',
+    overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12,
+    flexShrink: 0, zIndex: 40,
+  } : {
+    background: 'var(--bg-card)', border: '1px solid var(--border)',
+    borderRadius: 12, padding: 16, marginBottom: 16, width: '100%', maxWidth: 960,
+    boxShadow: '0 10px 25px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', gap: 14,
+  };
+
   return (
-    <div style={{
-      background: 'var(--bg-card)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: 16, marginBottom: 16, width: '100%', maxWidth: 960,
-      boxShadow: '0 10px 25px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: 14,
-    }}>
-      {/* Top Bar Switcher */}
+    <div style={containerStyle}>
+      {/* Studio Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', letterSpacing: '0.04em' }}>VISUAL DESIGN & TYPOGRAPHY STUDIO</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Inspector & Text Properties
+          </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {[
-            { id: 'text', label: 'Typography' },
-            { id: 'colors', label: 'Colors & Palette' },
-            { id: 'borders', label: 'Borders & Containers' },
-            { id: 'global', label: 'Global Theme' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                background: activeTab === tab.id ? 'var(--accent)' : 'transparent',
-                color: activeTab === tab.id ? '#ffffff' : 'var(--text-muted)',
-                border: activeTab === tab.id ? '1px solid var(--accent)' : '1px solid var(--border)',
-                borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 700,
-                cursor: 'pointer', transition: 'all 0.15s ease',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-
-          {onClose && (
-            <button
-              onClick={onClose}
-              style={{
-                background: 'transparent', border: 'none', color: 'var(--text-muted)',
-                cursor: 'pointer', fontSize: 16, padding: '0 6px', marginLeft: 6,
-              }}
-              title="Close Toolbar"
-            >
-              x
-            </button>
-          )}
-        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--text-muted)',
+              cursor: 'pointer', fontSize: 16, padding: '0 6px',
+            }}
+            title="Close Inspector"
+          >
+            x
+          </button>
+        )}
       </div>
 
-      {/* TAB 1: Typography Controls (Figma Direct Figures) */}
-      {activeTab === 'text' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, fontSize: 12 }}>
-          {/* Heading Font */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Heading Font (Google)</label>
-            <select className="input" value={headingFont} onChange={e => setHeadingFont(e.target.value)} style={{ padding: '6px 10px', fontSize: 12 }}>
-              {GOOGLE_FONTS.map(f => (
-                <option key={f.name} value={f.name}>{f.name}</option>
-              ))}
-            </select>
-          </div>
+      {/* Accordion 1: Text Properties */}
+      <div style={{ border: '1px solid var(--border-light)', borderRadius: 8, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpenSection(openSection === 'text' ? null : 'text')}
+          style={{
+            width: '100%', padding: '10px 12px', background: 'var(--bg-sidebar)',
+            border: 'none', color: 'var(--text)', fontSize: 12, fontWeight: 700,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
+          }}
+        >
+          <span>Text Properties</span>
+          <span>{openSection === 'text' ? '▼' : '▶'}</span>
+        </button>
 
-          {/* Body Font */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Body Font</label>
-            <select className="input" value={bodyFont} onChange={e => setBodyFont(e.target.value)} style={{ padding: '6px 10px', fontSize: 12 }}>
-              {GOOGLE_FONTS.map(f => (
-                <option key={f.name} value={f.name}>{f.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Font Weight */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Font Weight</label>
-            <select className="input" value={fontWeight} onChange={e => setFontWeight(e.target.value)} style={{ padding: '6px 10px', fontSize: 12 }}>
-              {Object.entries(WEIGHT_LABELS).map(([k, label]) => (
-                <option key={k} value={k}>{label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Editable Letter Spacing (Figma Numeric Figure) */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Letter Spacing (em / px)</label>
-            <input
-              className="input"
-              value={letterSpacing}
-              onChange={e => setLetterSpacing(e.target.value)}
-              placeholder="e.g. -0.02em, 1px, 0.05em"
-              style={{ padding: '6px 10px', fontSize: 12 }}
-            />
-          </div>
-
-          {/* Editable Line Height (Figma Numeric Figure) */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Line Height (figure)</label>
-            <input
-              className="input"
-              value={lineHeight}
-              onChange={e => setLineHeight(e.target.value)}
-              placeholder="e.g. 1.2, 1.4, 1.6"
-              style={{ padding: '6px 10px', fontSize: 12 }}
-            />
-          </div>
-
-          {/* Text Transform */}
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Case Format</label>
-            <select className="input" value={textTransform} onChange={e => setTextTransform(e.target.value)} style={{ padding: '6px 10px', fontSize: 12 }}>
-              <option value="none">As Typed (Standard)</option>
-              <option value="uppercase">UPPERCASE (FIGMA CAPS)</option>
-              <option value="capitalize">Capitalize Words</option>
-              <option value="lowercase">lowercase</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: Colors & Palettes */}
-      {activeTab === 'colors' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, fontSize: 12 }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Title Color</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="color" value={titleColor} onChange={e => setTitleColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
-              <input className="input" value={titleColor} onChange={e => setTitleColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 100 }} />
+        {openSection === 'text' && (
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, background: 'var(--bg-card)' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Heading Font (Google)</label>
+              <select className="input" value={headingFont} onChange={e => setHeadingFont(e.target.value)} style={{ padding: '6px 8px', fontSize: 12 }}>
+                {GOOGLE_FONTS.map(f => (
+                  <option key={f.name} value={f.name}>{f.name}</option>
+                ))}
+              </select>
             </div>
-          </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Body Text Color</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
-              <input className="input" value={textColor} onChange={e => setTextColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 100 }} />
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Body Font</label>
+              <select className="input" value={bodyFont} onChange={e => setBodyFont(e.target.value)} style={{ padding: '6px 8px', fontSize: 12 }}>
+                {GOOGLE_FONTS.map(f => (
+                  <option key={f.name} value={f.name}>{f.name}</option>
+                ))}
+              </select>
             </div>
-          </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Accent Color</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
-              <input className="input" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 100 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Weight</label>
+                <select className="input" value={fontWeight} onChange={e => setFontWeight(e.target.value)} style={{ padding: '6px 8px', fontSize: 11 }}>
+                  {Object.entries(WEIGHT_LABELS).map(([k, label]) => (
+                    <option key={k} value={k}>{label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Case</label>
+                <select className="input" value={textTransform} onChange={e => setTextTransform(e.target.value)} style={{ padding: '6px 8px', fontSize: 11 }}>
+                  <option value="none">As Typed</option>
+                  <option value="uppercase">UPPERCASE</option>
+                  <option value="capitalize">Capitalize</option>
+                  <option value="lowercase">lowercase</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Canvas Background</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} style={{ width: 32, height: 32, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
-              <input className="input" value={bgColor} onChange={e => setBgColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 100 }} />
-            </div>
-          </div>
-
-          <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', marginBottom: 6 }}>COLOR PALETTE SWATCHES</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {COLOR_PRESETS.map(hex => (
-                <div
-                  key={hex}
-                  onClick={() => setAccentColor(hex)}
-                  title={`Set accent color: ${hex}`}
-                  style={{
-                    width: 24, height: 24, borderRadius: 4, background: hex,
-                    border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer',
-                    transition: 'transform 0.15s ease',
-                  }}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Ltr Spacing</label>
+                <input
+                  className="input"
+                  value={letterSpacing}
+                  onChange={e => setLetterSpacing(e.target.value)}
+                  placeholder="-0.02em"
+                  style={{ padding: '6px 8px', fontSize: 11 }}
                 />
-              ))}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Line Height</label>
+                <input
+                  className="input"
+                  value={lineHeight}
+                  onChange={e => setLineHeight(e.target.value)}
+                  placeholder="1.2"
+                  style={{ padding: '6px 8px', fontSize: 11 }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* TAB 3: Container Borders & Styling */}
-      {activeTab === 'borders' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, fontSize: 12 }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Container Border</label>
+      {/* Accordion 2: Color Picker & Palette */}
+      <div style={{ border: '1px solid var(--border-light)', borderRadius: 8, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpenSection(openSection === 'colors' ? null : 'colors')}
+          style={{
+            width: '100%', padding: '10px 12px', background: 'var(--bg-sidebar)',
+            border: 'none', color: 'var(--text)', fontSize: 12, fontWeight: 700,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
+          }}
+        >
+          <span>Color Picker & Palette</span>
+          <span>{openSection === 'colors' ? '▼' : '▶'}</span>
+        </button>
+
+        {openSection === 'colors' && (
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, background: 'var(--bg-card)' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Title Color</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="color" value={titleColor} onChange={e => setTitleColor(e.target.value)} style={{ width: 28, height: 28, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
+                <input className="input" value={titleColor} onChange={e => setTitleColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 11, width: 100 }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Body Text Color</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} style={{ width: 28, height: 28, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
+                <input className="input" value={textColor} onChange={e => setTextColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 11, width: 100 }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Accent Color</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ width: 28, height: 28, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
+                <input className="input" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 11, width: 100 }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Canvas Background</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} style={{ width: 28, height: 28, border: 'none', borderRadius: 4, cursor: 'pointer' }} />
+                <input className="input" value={bgColor} onChange={e => setBgColor(e.target.value)} style={{ padding: '4px 8px', fontSize: 11, width: 100 }} />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', marginBottom: 6 }}>PALETTE SWATCHES</div>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                {COLOR_PRESETS.map(hex => (
+                  <div
+                    key={hex}
+                    onClick={() => setAccentColor(hex)}
+                    title={`Set accent color: ${hex}`}
+                    style={{
+                      width: 20, height: 20, borderRadius: 4, background: hex,
+                      border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Accordion 3: Borders & Effects */}
+      <div style={{ border: '1px solid var(--border-light)', borderRadius: 8, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpenSection(openSection === 'borders' ? null : 'borders')}
+          style={{
+            width: '100%', padding: '10px 12px', background: 'var(--bg-sidebar)',
+            border: 'none', color: 'var(--text)', fontSize: 12, fontWeight: 700,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
+          }}
+        >
+          <span>Borders & Effects</span>
+          <span>{openSection === 'borders' ? '▼' : '▶'}</span>
+        </button>
+
+        {openSection === 'borders' && (
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, background: 'var(--bg-card)' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Border State</label>
+              <button
+                onClick={() => setBorderEnabled(!borderEnabled)}
+                style={{
+                  width: '100%', padding: '6px 10px', fontSize: 11, fontWeight: 700,
+                  background: borderEnabled ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
+                  color: borderEnabled ? '#ffffff' : 'var(--text-muted)',
+                  border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer',
+                }}
+              >
+                {borderEnabled ? 'Border Enabled' : 'Border Disabled'}
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Width</label>
+                <input
+                  className="input"
+                  value={borderWidth}
+                  onChange={e => setBorderWidth(e.target.value)}
+                  placeholder="1px"
+                  style={{ padding: '6px 8px', fontSize: 11 }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Style</label>
+                <select className="input" value={borderStyle} onChange={e => setBorderStyle(e.target.value)} style={{ padding: '6px 8px', fontSize: 11 }}>
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="double">Double</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Radius</label>
+              <input
+                className="input"
+                value={borderRadius}
+                onChange={e => setBorderRadius(e.target.value)}
+                placeholder="14px"
+                style={{ padding: '6px 8px', fontSize: 11 }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Accordion 4: Global Deck System */}
+      <div style={{ border: '1px solid var(--border-light)', borderRadius: 8, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpenSection(openSection === 'global' ? null : 'global')}
+          style={{
+            width: '100%', padding: '10px 12px', background: 'var(--bg-sidebar)',
+            border: 'none', color: 'var(--text)', fontSize: 12, fontWeight: 700,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
+          }}
+        >
+          <span>Global Deck Theme</span>
+          <span>{openSection === 'global' ? '▼' : '▶'}</span>
+        </button>
+
+        {openSection === 'global' && (
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, background: 'var(--bg-card)' }}>
+            <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>
+              Save current typography, color palette, and borders as the global theme for all slides in this deck.
+            </p>
             <button
-              onClick={() => setBorderEnabled(!borderEnabled)}
-              style={{
-                width: '100%', padding: '6px 10px', fontSize: 12, fontWeight: 700,
-                background: borderEnabled ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
-                color: borderEnabled ? '#ffffff' : 'var(--text-muted)',
-                border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer',
-              }}
+              className="btn-primary"
+              onClick={handleSaveGlobal}
+              disabled={savingGlobal}
+              style={{ width: '100%', padding: '8px 12px', fontSize: 11, fontWeight: 700 }}
             >
-              {borderEnabled ? 'Border Enabled' : 'No Border (Disabled)'}
+              {savingGlobal ? 'Saving Theme...' : 'Save Theme to All Slides'}
             </button>
           </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Border Width</label>
-            <input
-              className="input"
-              value={borderWidth}
-              onChange={e => setBorderWidth(e.target.value)}
-              placeholder="1px, 2px, 4px"
-              style={{ padding: '6px 10px', fontSize: 12 }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Border Style</label>
-            <select className="input" value={borderStyle} onChange={e => setBorderStyle(e.target.value)} style={{ padding: '6px 10px', fontSize: 12 }}>
-              <option value="solid">Solid</option>
-              <option value="dashed">Dashed</option>
-              <option value="dotted">Dotted</option>
-              <option value="double">Double</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Border Radius</label>
-            <input
-              className="input"
-              value={borderRadius}
-              onChange={e => setBorderRadius(e.target.value)}
-              placeholder="0px, 8px, 16px"
-              style={{ padding: '6px 10px', fontSize: 12 }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, color: 'var(--text-subtle)' }}>Container Fill Color</label>
-            <input
-              className="input"
-              value={containerBg}
-              onChange={e => setContainerBg(e.target.value)}
-              placeholder="rgba(255,255,255,0.05) or #1e293b"
-              style={{ padding: '6px 10px', fontSize: 12 }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: Global Deck Theme Storage */}
-      {activeTab === 'global' && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 8, background: 'var(--bg-sidebar)', borderRadius: 8 }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', marginBottom: 2 }}>
-              Save as Global Deck Theme
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              Applies these font families, weights, spacing, border styles, and color palette across all slides in this deck.
-            </div>
-          </div>
-
-          <button
-            className="btn-primary"
-            onClick={handleSaveGlobal}
-            disabled={savingGlobal}
-            style={{ padding: '8px 16px', fontSize: 12, fontWeight: 700 }}
-          >
-            {savingGlobal ? 'Saving Global Theme...' : 'Save Global Theme to All Slides'}
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

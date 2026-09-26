@@ -1,4 +1,4 @@
-// pages/deck/[deckId].jsx - Notion Block Canvas Deck Editor with Full Live Inline Editing, Drag-and-Drop Visual Studio & Slide Reordering
+// pages/deck/[deckId].jsx - Ultra-Modern Pitch Deck Creator & Visual Studio Canvas
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -42,7 +42,7 @@ export default function DeckEditor() {
   const [showLogs, setShowLogs] = useState(false);
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [showChartModal, setShowChartModal] = useState(false);
-  const [showFormatStudio, setShowFormatStudio] = useState(false);
+  const [showInspector, setShowInspector] = useState(true);
   const [logs, setLogs] = useState([]);
   const [exportName, setExportName] = useState('');
   const [currentBgId, setCurrentBgId] = useState('dark-obsidian');
@@ -54,6 +54,9 @@ export default function DeckEditor() {
   const [draggedSlideIdx, setDraggedSlideIdx] = useState(null);
   // Right Click Context Menu State
   const [contextMenu, setContextMenu] = useState(null);
+
+  // Active Selected Canvas Block
+  const [selectedBlock, setSelectedBlock] = useState('title');
 
   // Local Editable State for Current Active Slide
   const [slideContent, setSlideContent] = useState({});
@@ -295,6 +298,8 @@ export default function DeckEditor() {
   // ─── Mouse Drag-and-Drop Handler for Canvas Elements ────────────────────────
   const handleDragStart = (e, itemKey) => {
     e.stopPropagation();
+    setActiveDrag(itemKey);
+    setSelectedBlock(itemKey);
     const positions = slideContent.positions || {};
     const currentPos = positions[itemKey] || { x: 0, y: 0 };
     const startMouse = { x: e.clientX, y: e.clientY };
@@ -312,6 +317,7 @@ export default function DeckEditor() {
     const handleMouseUp = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      setActiveDrag(null);
       setSlideContent(latest => {
         triggerSave(latest);
         return latest;
@@ -549,14 +555,14 @@ export default function DeckEditor() {
   return (
     <NotionLayout activeTab="dashboard" title={deck.name}>
       <div style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Editor Top Bar */}
+        {/* Top Navigation Bar */}
         <div style={{
           height: 52, padding: '0 20px', background: 'var(--bg-card)',
           borderBottom: '1px solid var(--border)', display: 'flex',
           alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, gap: 12,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{deck.name}</span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--text)', letterSpacing: '0.02em' }}>{deck.name}</span>
             <span className={`badge badge-${deck.status}`}>{deck.status}</span>
 
             {/* Save Status */}
@@ -577,17 +583,17 @@ export default function DeckEditor() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Format Studio Toggle */}
+            {/* Inspector Toggle Button */}
             <button
               className="btn-secondary"
-              onClick={() => setShowFormatStudio(!showFormatStudio)}
+              onClick={() => setShowInspector(!showInspector)}
               style={{
                 fontSize: 12, padding: '5px 12px', fontWeight: 700,
-                background: showFormatStudio ? 'var(--accent)' : 'transparent',
-                color: showFormatStudio ? '#ffffff' : 'var(--text)',
+                background: showInspector ? 'var(--accent)' : 'transparent',
+                color: showInspector ? '#ffffff' : 'var(--text)',
               }}
             >
-              Design & Typography Studio
+              Figma Inspector Panel {showInspector ? '[ON]' : '[OFF]'}
             </button>
 
             {/* Background Picker */}
@@ -615,7 +621,7 @@ export default function DeckEditor() {
                   disabled={exporting}
                   style={{ fontSize: 12, padding: '5px 12px' }}
                 >
-                  Download PDF
+                  Export PDF
                 </button>
                 <button
                   className="btn-primary"
@@ -623,7 +629,7 @@ export default function DeckEditor() {
                   disabled={exporting}
                   style={{ fontSize: 12, padding: '5px 12px' }}
                 >
-                  Download PPTX
+                  Export PPTX
                 </button>
               </>
             )}
@@ -637,9 +643,9 @@ export default function DeckEditor() {
           </div>
         </div>
 
-        {/* Editor Main Stage */}
+        {/* Editor Main Stage (3-Column Layout: Left Outline, Center Canvas, Right Popover Inspector) */}
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Left Slide Thumbnails Sidebar (Draggable Reorder & Visual Fidelity) */}
+          {/* Left Panel: Slide Deck Outline Thumbnails */}
           <div style={{
             width: 240, background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border)',
             overflowY: 'auto', padding: 14, display: 'flex', flexDirection: 'column', gap: 10,
@@ -647,7 +653,7 @@ export default function DeckEditor() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
-                SLIDES ({slides.length})
+                SLIDE DECK ({slides.length})
               </span>
               <button
                 onClick={handleAddSlide}
@@ -656,7 +662,7 @@ export default function DeckEditor() {
                   borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                + Add Slide
+                + Slide
               </button>
             </div>
 
@@ -682,12 +688,11 @@ export default function DeckEditor() {
                     padding: 10, borderRadius: 8, cursor: 'grab',
                     display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
                     border: isSelected ? '2px solid var(--accent)' : `1px solid ${bgPreset.style.border}`,
-                    boxShadow: isSelected ? '0 0 10px rgba(99,102,241,0.4)' : 'none',
+                    boxShadow: isSelected ? '0 0 12px rgba(99,102,241,0.5)' : 'none',
                     opacity: draggedSlideIdx === idx ? 0.4 : 1,
                     transition: 'all 0.15s ease', position: 'relative',
                   }}
                 >
-                  {/* Left Accent Bar on Thumbnail */}
                   <div style={{
                     position: 'absolute', top: 0, left: 0, bottom: 0, width: 4,
                     background: visualTheme.accentColor || bgPreset.style.accent,
@@ -716,7 +721,6 @@ export default function DeckEditor() {
                     </div>
                   )}
 
-                  {/* Widget Indicators Badge */}
                   {sContent.widgets && sContent.widgets.length > 0 && (
                     <div style={{ fontSize: 9, fontWeight: 700, color: visualTheme.accentColor || 'var(--accent)', marginTop: 4, paddingLeft: 6 }}>
                       [{sContent.widgets.length} Widget{sContent.widgets.length > 1 ? 's' : ''}]
@@ -727,31 +731,31 @@ export default function DeckEditor() {
             })}
           </div>
 
-          {/* Center Presentation Stage & Live Canvas */}
+          {/* Center Stage: Floating Canvas Toolbar & Slide Canvas */}
           <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {currentSlide ? (
-              <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Collapsible Figma Visual Typography & Color Studio Toolbar */}
-                {showFormatStudio && (
-                  <FigmaTypographyToolbar
-                    currentTheme={visualTheme}
-                    onChangeTheme={theme => setVisualTheme(theme)}
-                    onSaveGlobalTheme={handleSaveGlobalTheme}
-                    onClose={() => setShowFormatStudio(false)}
-                  />
-                )}
-
-                {/* Slide Action Bar */}
+              <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                
+                {/* Floating Canvas Quick Toolbar */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: 'var(--bg-card)', border: '1px solid var(--border)',
-                  borderRadius: 8, padding: '8px 16px', gap: 12, flexWrap: 'wrap',
+                  background: 'rgba(18, 22, 34, 0.85)', backdropFilter: 'blur(12px)',
+                  border: '1px solid var(--border)', borderRadius: 10, padding: '8px 16px', gap: 12, flexWrap: 'wrap',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>SLIDE TYPE:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>CANVAS TOOLBAR:</span>
+                    <button className="btn-secondary" onClick={() => addWidget('stat_card')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Stat Card</button>
+                    <button className="btn-secondary" onClick={() => addWidget('text_box')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Text Box</button>
+                    <button className="btn-secondary" onClick={() => addWidget('callout_box')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Callout</button>
+                    <button className="btn-secondary" onClick={() => addWidget('bordered_container')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Container</button>
+                    <button className="btn-secondary" onClick={() => setShowChartModal(true)} style={{ fontSize: 11, padding: '4px 8px' }}>Edit Chart</button>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <select
                       className="input"
-                      style={{ padding: '4px 8px', fontSize: 12, width: 180 }}
+                      style={{ padding: '4px 8px', fontSize: 11, width: 160 }}
                       value={slideType}
                       onChange={e => {
                         setSlideType(e.target.value);
@@ -763,57 +767,21 @@ export default function DeckEditor() {
                       ))}
                     </select>
 
-                    <button
-                      className="btn-secondary"
-                      onClick={() => setShowChartModal(true)}
-                      style={{ fontSize: 12, padding: '4px 10px' }}
-                    >
-                      Edit Chart Data {slideChartData ? '[v]' : ''}
+                    <button className="btn-primary" onClick={() => persistSlide(slideContent, slideChartData, slideType, slideLayout)} style={{ fontSize: 11, padding: '4px 12px', fontWeight: 700 }}>
+                      Save Slide
                     </button>
-
-                    {/* Add Widget Dropdown */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)' }}>+ WIDGET:</span>
-                      <button className="btn-secondary" onClick={() => addWidget('stat_card')} style={{ fontSize: 11, padding: '3px 8px' }}>Stat Card</button>
-                      <button className="btn-secondary" onClick={() => addWidget('text_box')} style={{ fontSize: 11, padding: '3px 8px' }}>Text Box</button>
-                      <button className="btn-secondary" onClick={() => addWidget('callout_box')} style={{ fontSize: 11, padding: '3px 8px' }}>Callout</button>
-                      <button className="btn-secondary" onClick={() => addWidget('bordered_container')} style={{ fontSize: 11, padding: '3px 8px' }}>Border Container</button>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <button
-                      className="btn-primary"
-                      onClick={() => persistSlide(slideContent, slideChartData, slideType, slideLayout)}
-                      style={{ fontSize: 12, padding: '4px 12px', fontWeight: 700 }}
-                    >
-                      Save Changes
+                    <button className="btn-secondary" onClick={handleDuplicateSlide} style={{ fontSize: 11, padding: '4px 10px' }}>
+                      Duplicate
                     </button>
-
-                    <button
-                      className="btn-secondary"
-                      onClick={handleDuplicateSlide}
-                      style={{ fontSize: 12, padding: '4px 10px' }}
-                    >
-                      Duplicate Slide
-                    </button>
-
-                    <button
-                      onClick={handleDeleteSlide}
-                      style={{
-                        background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e',
-                        border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: 6,
-                        fontSize: 12, padding: '4px 10px', cursor: 'pointer',
-                      }}
-                    >
+                    <button onClick={handleDeleteSlide} style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e', border: '1px solid rgba(244, 63, 94, 0.3)', borderRadius: 6, fontSize: 11, padding: '4px 10px', cursor: 'pointer' }}>
                       Delete
                     </button>
                   </div>
                 </div>
 
-                {/* Presentation Canvas Box (Fully Visually Positionable & Border-Customizable) */}
+                {/* Active Slide Presentation Canvas */}
                 <div style={{
-                  width: '100%', minHeight: 480,
+                  width: '100%', minHeight: 490,
                   background: visualTheme.bgColor || bgPreset.style.background,
                   backgroundImage: visualTheme.bgColor ? 'none' : bgPreset.style.backgroundImage,
                   backgroundSize: bgPreset.style.backgroundSize || 'cover',
@@ -825,7 +793,7 @@ export default function DeckEditor() {
                     : 'none',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
                   padding: '40px 48px', display: 'flex', flexDirection: 'column',
-                  justify: 'space-between', position: 'relative', transition: 'background 0.2s ease',
+                  justifyContent: 'space-between', position: 'relative', transition: 'background 0.2s ease',
                 }}>
                   {/* Left Accent Bar */}
                   <div style={{
@@ -835,11 +803,16 @@ export default function DeckEditor() {
                     borderBottomLeftRadius: visualTheme.borderRadius || '14px',
                   }} />
 
-                  {/* Header / Title Draggable Group */}
-                  <div style={{
-                    transform: `translate(${positions.title_group?.x || 0}px, ${positions.title_group?.y || 0}px)`,
-                    position: 'relative', transition: activeDrag === 'title_group' ? 'none' : 'transform 0.1s ease',
-                  }}>
+                  {/* Header / Title Group */}
+                  <div
+                    onClick={() => setSelectedBlock('title_group')}
+                    style={{
+                      transform: `translate(${positions.title_group?.x || 0}px, ${positions.title_group?.y || 0}px)`,
+                      position: 'relative', transition: activeDrag === 'title_group' ? 'none' : 'transform 0.1s ease',
+                      border: selectedBlock === 'title_group' ? '1px dashed var(--accent)' : '1px solid transparent',
+                      borderRadius: 8, padding: 4,
+                    }}
+                  >
                     <div
                       onMouseDown={e => handleDragStart(e, 'title_group')}
                       style={{
@@ -850,7 +823,6 @@ export default function DeckEditor() {
                       ::: DRAG TITLE BLOCK
                     </div>
 
-                    {/* Slide Type Tag */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                       <span style={{
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
@@ -897,16 +869,21 @@ export default function DeckEditor() {
                     />
                   </div>
 
-                  {/* Content & Charts Grid */}
+                  {/* Content Grid */}
                   <div style={{
                     display: 'grid', gridTemplateColumns: slideChartData && slideChartData.type !== 'none' ? '1fr 1fr' : '1fr',
                     gap: 24, flex: 1, margin: '16px 0',
                   }}>
                     {/* Left Column: Bullets / Members / Widgets */}
-                    <div style={{
-                      transform: `translate(${positions.body_group?.x || 0}px, ${positions.body_group?.y || 0}px)`,
-                      display: 'flex', flexDirection: 'column', gap: 12, position: 'relative',
-                    }}>
+                    <div
+                      onClick={() => setSelectedBlock('body_group')}
+                      style={{
+                        transform: `translate(${positions.body_group?.x || 0}px, ${positions.body_group?.y || 0}px)`,
+                        display: 'flex', flexDirection: 'column', gap: 12, position: 'relative',
+                        border: selectedBlock === 'body_group' ? '1px dashed var(--accent)' : '1px solid transparent',
+                        borderRadius: 8, padding: 4,
+                      }}
+                    >
                       <div
                         onMouseDown={e => handleDragStart(e, 'body_group')}
                         style={{
@@ -1122,14 +1099,17 @@ export default function DeckEditor() {
                       )}
                     </div>
 
-                    {/* Right Column: Interactive Chart Preview (Draggable) */}
+                    {/* Right Column: Chart (Draggable) */}
                     {slideChartData && slideChartData.type !== 'none' && (
-                      <div style={{
-                        transform: `translate(${positions.chart_group?.x || 0}px, ${positions.chart_group?.y || 0}px)`,
-                        background: 'rgba(0,0,0,0.4)',
-                        border: visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.15)'}` : 'none',
-                        borderRadius: visualTheme.borderRadius || 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column', position: 'relative',
-                      }}>
+                      <div
+                        onClick={() => setSelectedBlock('chart_group')}
+                        style={{
+                          transform: `translate(${positions.chart_group?.x || 0}px, ${positions.chart_group?.y || 0}px)`,
+                          background: 'rgba(0,0,0,0.4)',
+                          border: selectedBlock === 'chart_group' ? '1px dashed var(--accent)' : (visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.15)'}` : 'none'),
+                          borderRadius: visualTheme.borderRadius || 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column', position: 'relative',
+                        }}
+                      >
                         <div onMouseDown={e => handleDragStart(e, 'chart_group')} style={{ cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
                           ::: DRAG CHART
                         </div>
@@ -1144,7 +1124,7 @@ export default function DeckEditor() {
                     )}
                   </div>
 
-                  {/* Slide Canvas Footer */}
+                  {/* Canvas Footer */}
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     fontSize: 11, opacity: 0.6, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -1160,10 +1140,21 @@ export default function DeckEditor() {
               </div>
             )}
           </div>
+
+          {/* Right Panel: Figma Popover Inspector Studio */}
+          {showInspector && (
+            <FigmaTypographyToolbar
+              isSidebar={true}
+              currentTheme={visualTheme}
+              onChangeTheme={theme => setVisualTheme(theme)}
+              onSaveGlobalTheme={handleSaveGlobalTheme}
+              onClose={() => setShowInspector(false)}
+            />
+          )}
         </div>
       </div>
 
-      {/* Floating Right Click Context Menu for Slide Thumbnails */}
+      {/* Floating Context Menu for Slide Thumbnails */}
       {contextMenu && (
         <div style={{
           position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 2000,
