@@ -35,7 +35,9 @@ async function request(method, path, body, opts = {}) {
 const api = {
   // Auth
   login: (email, password) => request('POST', '/api/auth/login', { email, password }),
+  register: (name, email, password) => request('POST', '/api/auth/register', { name, email, password }),
   me: () => request('GET', '/api/auth/me'),
+
   updatePassword: (currentPassword, newPassword) => request('POST', '/api/auth/password', { currentPassword, newPassword }),
   createUser: (data) => request('POST', '/api/auth/users', data),
   listUsers: () => request('GET', '/api/auth/users'),

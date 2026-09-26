@@ -153,11 +153,13 @@ function adminOnly(req, res, next) {
 
 // Auth
 app.post('/api/auth/login', authController.login);
+app.post('/api/auth/register', authController.register);
 app.get('/api/auth/me', auth, authController.me);
 app.post('/api/auth/password', auth, authController.updatePassword);
 // FIX #11: Admin routes protected at router level (defence in depth)
 app.post('/api/auth/users', auth, adminOnly, authController.createUser);
 app.get('/api/auth/users', auth, adminOnly, authController.listUsers);
+
 
 // Decks
 app.post('/api/decks', auth, deckController.createDeck);

@@ -118,14 +118,37 @@ async function createUser(req, res) {
   }
 }
 
-async function listUsers(req, res) {
+async function register(req, res) {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
-    const result = await pool.query('SELECT id, name, email, role, created_at FROM users ORDER BY created_at');
-    res.json(result.rows);
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
+    }
+    if (!isValidEmail(email)) return res.status(400).json({ error: 'Invalid email address' });
+
+    const passwordError = validatePassword(password);
+    if (passwordError) return res.status(400).json({ error: passwordError });
+
+    const hash = await bcrypt.hash(password, 12);
+    const result = await pool.query(
+      'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
+      [name.trim(), email.toLowerCase().trim(), hash, 'editor']
+    );
+
+    const user = result.rows[0];
+    const token = jwt.sign(
+      { userId: user.id, role: user.role, name: user.name, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d', algorithm: 'HS256' }
+    );
+
+    res.json({ token, user });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to list users' });
+    if (err.code === '23505') return res.status(400).json({ error: 'Account with this email already exists' });
+    console.error(err);
+    res.status(500).json({ error: 'Registration failed' });
   }
 }
 
-module.exports = { login, me, updatePassword, createUser, listUsers };
+module.exports = { login, register, me, updatePassword, createUser, listUsers };
+
