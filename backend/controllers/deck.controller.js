@@ -115,6 +115,28 @@ async function updateSlide(req, res) {
   }
 }
 
+async function addSlide(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId)) return res.status(400).json({ error: 'Invalid deck ID' });
+    const slide = await deckService.addSlide(req.params.deckId, req.body, req.user.userId);
+    res.status(201).json(slide);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to add slide' });
+  }
+}
+
+async function deleteSlide(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId) || !isValidUUID(req.params.slideId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+    const result = await deckService.deleteSlide(req.params.slideId, req.params.deckId, req.user.userId);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to delete slide' });
+  }
+}
+
 async function deleteDeck(req, res) {
   try {
     if (!isValidUUID(req.params.deckId)) return res.status(400).json({ error: 'Invalid deck ID' });
@@ -207,6 +229,6 @@ async function retryDeck(req, res) {
 }
 
 module.exports = {
-  createDeck, getDeck, listDecks, updateSlide, deleteDeck,
+  createDeck, getDeck, listDecks, updateSlide, addSlide, deleteSlide, deleteDeck,
   getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics, retryDeck,
 };

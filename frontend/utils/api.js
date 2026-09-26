@@ -53,7 +53,9 @@ const api = {
   useTemplate: (id, data = {}) => request('POST', `/api/templates/${id}/use`, data),
 
   // Slides
+  addSlide: (deckId, data = {}) => request('POST', `/api/decks/${deckId}/slides`, data),
   updateSlide: (deckId, slideId, data) => request('PUT', `/api/decks/${deckId}/slides/${slideId}`, data),
+  deleteSlide: (deckId, slideId) => request('DELETE', `/api/decks/${deckId}/slides/${slideId}`),
 
   // Versions
   getVersions: (deckId) => request('GET', `/api/decks/${deckId}/versions`),

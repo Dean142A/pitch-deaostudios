@@ -172,7 +172,9 @@ app.get('/api/templates/:templateId', auth, templateController.getTemplate);
 app.post('/api/templates/:templateId/use', auth, templateController.useTemplate);
 
 // Slides
+app.post('/api/decks/:deckId/slides', auth, deckController.addSlide);
 app.put('/api/decks/:deckId/slides/:slideId', auth, deckController.updateSlide);
+app.delete('/api/decks/:deckId/slides/:slideId', auth, deckController.deleteSlide);
 
 // Versions
 app.get('/api/decks/:deckId/versions', auth, deckController.getVersions);

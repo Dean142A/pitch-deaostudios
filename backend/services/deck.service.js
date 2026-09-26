@@ -273,6 +273,44 @@ async function updateSlide(slideId, deckId, updates, userId) {
   return slide;
 }
 
+async function addSlide(deckId, slideData = {}, userId) {
+  const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
+  if (!deck.rows[0]) throw new Error('Deck not found');
+  if (deck.rows[0].owner_id !== userId) throw new Error('Forbidden: not deck owner');
+
+  const countRes = await pool.query(`SELECT COUNT(*) FROM slides WHERE deck_id = $1`, [deckId]);
+  const slideOrder = parseInt(countRes.rows[0].count) || 0;
+
+  const defaultContent = {
+    title: slideData.title || 'New Custom Slide',
+    subtitle: slideData.subtitle || 'Add slide details and bullet points below...',
+    bullets: ['Point 1: Key highlight', 'Point 2: Supporting metric or data'],
+  };
+
+  const result = await pool.query(
+    `INSERT INTO slides (deck_id, slide_type, slide_order, content, chart_data, layout)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [
+      deckId,
+      slideData.slide_type || 'solution',
+      slideOrder,
+      JSON.stringify(slideData.content || defaultContent),
+      slideData.chartData ? JSON.stringify(slideData.chartData) : null,
+      slideData.layout || 'single_column',
+    ]
+  );
+  return result.rows[0];
+}
+
+async function deleteSlide(slideId, deckId, userId) {
+  const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
+  if (!deck.rows[0]) throw new Error('Deck not found');
+  if (deck.rows[0].owner_id !== userId) throw new Error('Forbidden: not deck owner');
+
+  await pool.query(`DELETE FROM slides WHERE id = $1 AND deck_id = $2`, [slideId, deckId]);
+  return { message: 'Slide deleted' };
+}
+
 async function deleteDeck(deckId, userId) {
   const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
   if (!deck.rows[0]) throw new Error('Deck not found');

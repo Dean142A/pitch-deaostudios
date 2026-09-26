@@ -72,18 +72,24 @@ async function exportToPptx(deck, slides, filename) {
     s.background = { color: style.bg };
     s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 5.63, fill: { color: style.accent } });
 
-    if (content?.headline) {
-      s.addText(content.headline, {
+    const slideTitle = content?.title || content?.headline || content?.name || '';
+    const slideSubtitle = content?.subtitle || content?.subheadline || content?.description || '';
+
+    s.background = { color: style.bg };
+    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 5.63, fill: { color: style.accent } });
+
+    if (slideTitle) {
+      s.addText(slideTitle, {
         x: 0.4, y: 0.3, w: 12, h: 1,
-        fontSize: slide.slide_type === 'title' ? 44 : 28,
+        fontSize: slide.slide_type === 'title' ? 40 : 26,
         bold: true, color: style.title, fontFace: style.font, breakLine: false,
       });
     }
 
-    if (content?.subheadline) {
-      s.addText(content.subheadline, {
+    if (slideSubtitle) {
+      s.addText(slideSubtitle, {
         x: 0.4, y: slide.slide_type === 'title' ? 1.4 : 1.15, w: 12, h: 0.6,
-        fontSize: 16, color: 'a0aec0', fontFace: style.font,
+        fontSize: 15, color: 'a0aec0', fontFace: style.font,
       });
     }
 
@@ -91,23 +97,40 @@ async function exportToPptx(deck, slides, filename) {
     if (content?.bullets?.length > 0) {
       const bulletText = content.bullets.map(b => ({ text: `• ${b}`, options: { breakLine: true } }));
       s.addText(bulletText, {
-        x: 0.4, y: startY, w: chartData ? 6.5 : 12, h: 3,
-        fontSize: 14, color: style.text, fontFace: style.font, valign: 'top',
+        x: 0.4, y: startY, w: chartData ? 6.5 : 12, h: 2.8,
+        fontSize: 13, color: style.text, fontFace: style.font, valign: 'top',
+      });
+    } else if (content?.members?.length > 0) {
+      const memberText = content.members.map(m => ({ text: `${m.name} (${m.role}): ${m.bio}`, options: { breakLine: true } }));
+      s.addText(memberText, {
+        x: 0.4, y: startY, w: 12, h: 2.8,
+        fontSize: 13, color: style.text, fontFace: style.font, valign: 'top',
       });
     } else if (content?.body) {
       s.addText(content.body, {
-        x: 0.4, y: startY, w: chartData ? 6.5 : 12, h: 3,
-        fontSize: 14, color: style.text, fontFace: style.font, wrap: true, valign: 'top',
+        x: 0.4, y: startY, w: chartData ? 6.5 : 12, h: 2.8,
+        fontSize: 13, color: style.text, fontFace: style.font, wrap: true, valign: 'top',
+      });
+    }
+
+    if (content?.callout) {
+      s.addShape(pptx.ShapeType.rect, {
+        x: 0.4, y: 4.8, w: 11.5, h: 0.5,
+        fill: { color: '1e293b' }, line: { color: style.accent, width: 1 },
+      });
+      s.addText(`💡 ${content.callout}`, {
+        x: 0.5, y: 4.8, w: 11.3, h: 0.5,
+        fontSize: 11, color: style.accent, fontFace: style.font, valign: 'middle',
       });
     }
 
     if (chartData && chartData.type !== 'none') {
-      const chartX = 7.2, chartY = startY, chartW = 5.2, chartH = 3;
+      const chartX = 7.2, chartY = startY, chartW = 5.2, chartH = 2.8;
       s.addShape(pptx.ShapeType.rect, {
         x: chartX, y: chartY, w: chartW, h: chartH,
         fill: { color: '1e293b' }, line: { color: style.accent, width: 1 },
       });
-      s.addText(`📊 ${chartData.title || 'Chart'}\n${(chartData.labels || []).slice(0, 4).join(' · ')}`, {
+      s.addText(`📊 ${chartData.title || 'Chart'}\n${(chartData.labels || []).join(' · ')}`, {
         x: chartX, y: chartY, w: chartW, h: chartH,
         fontSize: 11, color: '64748b', align: 'center', valign: 'middle', fontFace: style.font,
       });
@@ -149,34 +172,72 @@ async function exportToPdf(deck, slides, filename) {
         try { return typeof slide.content === 'string' ? JSON.parse(slide.content) : slide.content; }
         catch { return {}; }
       })();
+      const chartData = (() => {
+        try { return typeof slide.chart_data === 'string' ? JSON.parse(slide.chart_data) : slide.chart_data; }
+        catch { return null; }
+      })();
+
+      const slideTitle = content?.title || content?.headline || content?.name || '';
+      const slideSubtitle = content?.subtitle || content?.subheadline || content?.description || '';
 
       doc.rect(0, 0, 1280, 720).fill(`#${style.bg}`);
-      doc.rect(0, 0, 10, 720).fill(`#${style.accent}`);
+      doc.rect(0, 0, 12, 720).fill(`#${style.accent}`);
 
-      if (content?.headline) {
-        doc.font('Helvetica-Bold').fontSize(slide.slide_type === 'title' ? 48 : 32)
-           .fillColor(`#${style.title}`).text(content.headline, 40, 60, { width: 1200 });
+      if (slideTitle) {
+        doc.font('Helvetica-Bold').fontSize(slide.slide_type === 'title' ? 40 : 28)
+           .fillColor(`#${style.title}`).text(slideTitle, 50, 50, { width: 1180 });
       }
 
-      if (content?.subheadline) {
-        doc.font('Helvetica').fontSize(18).fillColor('#94a3b8')
-           .text(content.subheadline, 40, slide.slide_type === 'title' ? 140 : 120, { width: 1200 });
+      if (slideSubtitle) {
+        doc.font('Helvetica').fontSize(16).fillColor('#94a3b8')
+           .text(slideSubtitle, 50, slide.slide_type === 'title' ? 120 : 100, { width: 1180 });
       }
 
-      const bodyY = slide.slide_type === 'title' ? 260 : 200;
-      const maxBullets = Math.floor((680 - bodyY) / 40);
+      const bodyY = slide.slide_type === 'title' ? 220 : 170;
       if (content?.bullets?.length > 0) {
-        doc.font('Helvetica').fontSize(16).fillColor(`#${style.text}`);
-        content.bullets.slice(0, maxBullets).forEach((bullet, i) => {
-          doc.text(`• ${bullet}`, 40, bodyY + i * 40, { width: 800 });
+        doc.font('Helvetica').fontSize(15).fillColor(`#${style.text}`);
+        content.bullets.forEach((bullet, i) => {
+          if (bodyY + i * 36 < 580) {
+            doc.text(`• ${bullet}`, 50, bodyY + i * 36, { width: chartData ? 650 : 1150 });
+          }
+        });
+      } else if (content?.members?.length > 0) {
+        doc.font('Helvetica').fontSize(14).fillColor(`#${style.text}`);
+        content.members.forEach((m, i) => {
+          if (bodyY + i * 45 < 580) {
+            doc.font('Helvetica-Bold').text(`${m.name} — ${m.role}`, 50, bodyY + i * 45);
+            doc.font('Helvetica').fontSize(12).fillColor('#94a3b8').text(m.bio, 50, bodyY + i * 45 + 18);
+          }
         });
       } else if (content?.body) {
-        doc.font('Helvetica').fontSize(15).fillColor(`#${style.text}`)
-           .text(content.body, 40, bodyY, { width: 1160, height: 680 - bodyY });
+        doc.font('Helvetica').fontSize(14).fillColor(`#${style.text}`)
+           .text(content.body, 50, bodyY, { width: chartData ? 650 : 1150 });
+      }
+
+      if (content?.callout) {
+        doc.rect(50, 600, 1180, 45).fill('#1e293b');
+        doc.font('Helvetica-Bold').fontSize(13).fillColor(`#${style.accent}`)
+           .text(`💡 ${content.callout}`, 65, 615, { width: 1150 });
+      }
+
+      if (chartData && chartData.type !== 'none') {
+        doc.rect(740, 170, 490, 380).fill('#1e293b');
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#ffffff')
+           .text(`📊 ${chartData.title || 'Chart Data'}`, 760, 190);
+        
+        if (chartData.labels && chartData.datasets?.[0]?.data) {
+          chartData.labels.forEach((label, li) => {
+            const val = chartData.datasets[0].data[li];
+            doc.font('Helvetica').fontSize(13).fillColor('#94a3b8')
+               .text(`${label}:`, 760, 240 + li * 30);
+            doc.font('Helvetica-Bold').fontSize(13).fillColor('#38bdf8')
+               .text(`${val}`, 960, 240 + li * 30);
+          });
+        }
       }
 
       doc.font('Helvetica').fontSize(10).fillColor('#475569')
-         .text(`${slideIdx + 1} / ${slides.length}`, 1160, 690);
+         .text(`${slideIdx + 1} / ${slides.length}`, 1180, 680);
     }
 
     doc.end();
