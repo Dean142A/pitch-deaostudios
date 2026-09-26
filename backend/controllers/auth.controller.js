@@ -150,5 +150,17 @@ async function register(req, res) {
   }
 }
 
+async function listUsers(req, res) {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+    const result = await pool.query('SELECT id, name, email, role, created_at FROM users ORDER BY created_at');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to list users' });
+  }
+}
+
 module.exports = { login, register, me, updatePassword, createUser, listUsers };
+
+
 
