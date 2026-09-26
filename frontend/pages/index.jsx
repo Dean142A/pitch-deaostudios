@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import NotionLayout from '../components/NotionLayout';
 import BackgroundPicker from '../components/BackgroundPicker';
+import TemplateGallery from '../components/TemplateGallery';
 import { BACKGROUND_PRESETS, getBackgroundPreset } from '../utils/backgrounds';
 import api from '../utils/api';
 
@@ -14,6 +15,7 @@ const STYLES = [
 
 export default function Home() {
   const router = useRouter();
+  const [creationMode, setCreationMode] = useState('templates'); // 'templates' | 'ai'
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +32,12 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem('deao_token');
     if (!token) router.push('/login');
-  }, []);
+    if (router.query.tab === 'ai') {
+      setCreationMode('ai');
+    } else if (router.query.tab === 'templates') {
+      setCreationMode('templates');
+    }
+  }, [router.query.tab]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -57,49 +64,92 @@ export default function Home() {
   const activeBg = getBackgroundPreset(form.backgroundPreset);
 
   return (
-    <NotionLayout activeTab="new" title="New Pitch Deck">
-      <div style={{ maxWidth: 780, margin: '0 auto', padding: '36px 24px' }}>
+    <NotionLayout activeTab={creationMode === 'templates' ? 'templates' : 'new'} title="Create Pitch Deck">
+      <div style={{ maxWidth: creationMode === 'templates' ? 1100 : 780, margin: '0 auto', padding: '36px 24px', transition: 'max-width 0.3s ease' }}>
         {/* Header callout */}
-        <div className="notion-callout" style={{ marginBottom: 32 }}>
+        <div className="notion-callout" style={{ marginBottom: 24 }}>
           <span style={{ fontSize: 24 }}>✨</span>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
-              Notion AI Pitch Deck Creator
+              Deao Studios Pitch Deck Creator
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-              Answer a few questions about your startup to generate a fully structured, multi-slide pitch deck with pre-saved backgrounds and interactive charts.
+              Pick from industry-proven ready-made templates to edit instantly, or generate a custom pitch deck tailored to your company using AI.
             </div>
           </div>
         </div>
 
-        {/* Wizard Steps Navigation */}
+        {/* Top Mode Selector Tabs */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
-          borderRadius: 8, padding: '12px 20px', marginBottom: 32,
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
+          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          borderRadius: 12, padding: 6, marginBottom: 32,
         }}>
-          {['1. Company Info', '2. Market & Goals', '3. Style & Background'].map((label, i) => {
-            const stepNum = i + 1;
-            const active = step === stepNum;
-            const completed = step > stepNum;
-            return (
-              <div
-                key={i}
-                onClick={() => completed && setStep(stepNum)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  cursor: completed ? 'pointer' : 'default',
-                  opacity: active || completed ? 1 : 0.4,
-                  fontSize: 13, fontWeight: active ? 700 : 500,
-                  color: active ? 'var(--accent)' : (completed ? '#34d399' : 'var(--text-muted)'),
-                }}
-              >
-                <span>{completed ? '✓' : stepNum + '.'}</span>
-                <span>{label.replace(/^\d+\.\s*/, '')}</span>
-              </div>
-            );
-          })}
+          <button
+            onClick={() => setCreationMode('templates')}
+            style={{
+              background: creationMode === 'templates' ? 'var(--accent)' : 'transparent',
+              color: creationMode === 'templates' ? '#ffffff' : 'var(--text-muted)',
+              border: 'none', borderRadius: 8, padding: '12px 16px',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <span>🎨</span> Ready-Made Templates
+          </button>
+
+          <button
+            onClick={() => setCreationMode('ai')}
+            style={{
+              background: creationMode === 'ai' ? 'var(--accent)' : 'transparent',
+              color: creationMode === 'ai' ? '#ffffff' : 'var(--text-muted)',
+              border: 'none', borderRadius: 8, padding: '12px 16px',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <span>✨</span> Generate with AI Prompt
+          </button>
         </div>
+
+        {/* Creation Mode 1: Ready-Made Templates Gallery */}
+        {creationMode === 'templates' && (
+          <TemplateGallery />
+        )}
+
+        {/* Creation Mode 2: AI Wizard */}
+        {creationMode === 'ai' && (
+          <>
+            {/* Wizard Steps Navigation */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '12px 20px', marginBottom: 32,
+            }}>
+              {['1. Company Info', '2. Market & Goals', '3. Style & Background'].map((label, i) => {
+                const stepNum = i + 1;
+                const active = step === stepNum;
+                const completed = step > stepNum;
+                return (
+                  <div
+                    key={i}
+                    onClick={() => completed && setStep(stepNum)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      cursor: completed ? 'pointer' : 'default',
+                      opacity: active || completed ? 1 : 0.4,
+                      fontSize: 13, fontWeight: active ? 700 : 500,
+                      color: active ? 'var(--accent)' : (completed ? '#34d399' : 'var(--text-muted)'),
+                    }}
+                  >
+                    <span>{completed ? '✓' : stepNum + '.'}</span>
+                    <span>{label.replace(/^\d+\.\s*/, '')}</span>
+                  </div>
+                );
+              })}
+            </div>
 
         {/* Step 1 */}
         {step === 1 && (
@@ -326,6 +376,8 @@ export default function Home() {
               </button>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
 

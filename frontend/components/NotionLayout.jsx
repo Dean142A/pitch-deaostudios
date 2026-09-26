@@ -30,7 +30,8 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
   }
 
   const navItems = [
-    { id: 'new', label: 'New Pitch Deck', icon: '✨', path: '/', primary: true },
+    { id: 'templates', label: 'Ready-Made Templates', icon: '🎨', path: '/?tab=templates' },
+    { id: 'new', label: 'AI Deck Creator', icon: '✨', path: '/?tab=ai', primary: true },
     { id: 'dashboard', label: 'All Decks', icon: '📚', path: '/dashboard' },
     { id: 'admin', label: 'Admin Settings', icon: '⚙️', path: '/admin', adminOnly: true },
   ];

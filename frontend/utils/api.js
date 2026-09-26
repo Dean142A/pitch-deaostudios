@@ -47,6 +47,11 @@ const api = {
   retryDeck: (id) => request('POST', `/api/decks/${id}/retry`),
   deleteDeck: (id) => request('DELETE', `/api/decks/${id}`),
 
+  // Ready-Made Templates
+  listTemplates: () => request('GET', '/api/templates'),
+  getTemplate: (id) => request('GET', `/api/templates/${id}`),
+  useTemplate: (id, data = {}) => request('POST', `/api/templates/${id}/use`, data),
+
   // Slides
   updateSlide: (deckId, slideId, data) => request('PUT', `/api/decks/${deckId}/slides/${slideId}`, data),
 

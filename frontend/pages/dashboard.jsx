@@ -61,11 +61,19 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <button className="btn-primary">
-              <span>+</span> New Pitch Deck
-            </button>
-          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>🎨</span> Browse Templates
+              </button>
+            </Link>
+
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>+</span> New Pitch Deck
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Notion Search & Filter Bar */}

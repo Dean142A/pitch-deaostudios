@@ -34,6 +34,7 @@ if (
 
 const authController = require('./controllers/auth.controller');
 const deckController = require('./controllers/deck.controller');
+const templateController = require('./controllers/template.controller');
 const exportController = require('./controllers/export.controller');
 const aiController = require('./controllers/ai.controller');
 const { cleanupOldFiles } = require('./services/export.service');
@@ -164,6 +165,11 @@ app.get('/api/decks', auth, deckController.listDecks);
 app.get('/api/decks/:deckId', auth, deckController.getDeck);
 app.delete('/api/decks/:deckId', auth, deckController.deleteDeck);
 app.post('/api/decks/:deckId/retry', auth, deckController.retryDeck);
+
+// Ready-Made Templates
+app.get('/api/templates', auth, templateController.listTemplates);
+app.get('/api/templates/:templateId', auth, templateController.getTemplate);
+app.post('/api/templates/:templateId/use', auth, templateController.useTemplate);
 
 // Slides
 app.put('/api/decks/:deckId/slides/:slideId', auth, deckController.updateSlide);
