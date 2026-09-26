@@ -125,6 +125,28 @@ async function addSlide(req, res) {
   }
 }
 
+async function duplicateSlide(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId) || !isValidUUID(req.params.slideId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+    const slide = await deckService.duplicateSlide(req.params.slideId, req.params.deckId, req.user.userId);
+    res.status(201).json(slide);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to duplicate slide' });
+  }
+}
+
+async function updateDeckTheme(req, res) {
+  try {
+    if (!isValidUUID(req.params.deckId)) return res.status(400).json({ error: 'Invalid deck ID' });
+    const deck = await deckService.updateDeckTheme(req.params.deckId, req.body, req.user.userId);
+    res.json(deck);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to update deck theme' });
+  }
+}
+
 async function deleteSlide(req, res) {
   try {
     if (!isValidUUID(req.params.deckId) || !isValidUUID(req.params.slideId)) {
@@ -229,6 +251,6 @@ async function retryDeck(req, res) {
 }
 
 module.exports = {
-  createDeck, getDeck, listDecks, updateSlide, addSlide, deleteSlide, deleteDeck,
-  getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics, retryDeck,
+  createDeck, getDeck, listDecks, updateSlide, addSlide, duplicateSlide, deleteSlide, deleteDeck,
+  updateDeckTheme, getVersions, restoreVersion, getQueueStatus, getAiLogs, getDeckMetrics, retryDeck,
 };

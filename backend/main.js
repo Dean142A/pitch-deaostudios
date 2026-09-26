@@ -171,10 +171,12 @@ app.get('/api/templates', auth, templateController.listTemplates);
 app.get('/api/templates/:templateId', auth, templateController.getTemplate);
 app.post('/api/templates/:templateId/use', auth, templateController.useTemplate);
 
-// Slides
+// Slides & Theme
 app.post('/api/decks/:deckId/slides', auth, deckController.addSlide);
+app.post('/api/decks/:deckId/slides/:slideId/duplicate', auth, deckController.duplicateSlide);
 app.put('/api/decks/:deckId/slides/:slideId', auth, deckController.updateSlide);
 app.delete('/api/decks/:deckId/slides/:slideId', auth, deckController.deleteSlide);
+app.put('/api/decks/:deckId/theme', auth, deckController.updateDeckTheme);
 
 // Versions
 app.get('/api/decks/:deckId/versions', auth, deckController.getVersions);

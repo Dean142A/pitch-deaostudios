@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import NotionLayout from '../../components/NotionLayout';
 import BackgroundPicker from '../../components/BackgroundPicker';
+import FigmaTypographyToolbar from '../../components/FigmaTypographyToolbar';
 import { getBackgroundPreset } from '../../utils/backgrounds';
 import api from '../../utils/api';
 
@@ -54,6 +55,7 @@ export default function DeckEditor() {
   const [currentBgId, setCurrentBgId] = useState('dark-obsidian');
   const [exporting, setExporting] = useState(false);
   const [savingStatus, setSavingStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
+  const [visualTheme, setVisualTheme] = useState({});
 
   // Local Editable State for Current Active Slide
   const [slideContent, setSlideContent] = useState({});
@@ -97,8 +99,12 @@ export default function DeckEditor() {
       setSlides(data.slides || []);
       setExportName(data.name ? data.name.replace(/\s+/g, '_') : 'Pitch_Deck');
 
-      if (data.input_data?.backgroundPreset) {
-        setCurrentBgId(data.input_data.backgroundPreset);
+      const inputData = safeParseJSON(data.input_data, {});
+      if (inputData?.globalTheme) {
+        setVisualTheme(inputData.globalTheme);
+      }
+      if (inputData?.backgroundPreset) {
+        setCurrentBgId(inputData.backgroundPreset);
       }
 
       if (data.status === 'generating' || data.status === 'queued') {
@@ -265,26 +271,27 @@ export default function DeckEditor() {
 
   async function handleDuplicateSlide() {
     const current = slides[selectedSlide];
-    if (!current) return;
+    if (!current || !current.id) return;
     try {
-      const parsedContent = safeParseJSON(current.content, {});
-      const parsedChart = safeParseJSON(current.chart_data, null);
-      
-      const newSlide = await api.addSlide(deckId, {
-        slide_type: current.slide_type || 'solution',
-        layout: current.layout || 'single_column',
-        content: { ...parsedContent, title: `${parsedContent.title || 'Slide'} (Copy)` },
-        chartData: parsedChart,
-      });
-
+      const duplicated = await api.duplicateSlide(deckId, current.id);
       setSlides(prev => {
         const next = [...prev];
-        next.splice(selectedSlide + 1, 0, newSlide);
+        next.splice(selectedSlide + 1, 0, duplicated);
         return next;
       });
       setSelectedSlide(selectedSlide + 1);
     } catch (err) {
       alert(`Failed to duplicate slide: ${err.message}`);
+    }
+  }
+
+  async function handleSaveGlobalTheme(globalThemeObj) {
+    try {
+      const updatedDeck = await api.updateDeckTheme(deckId, globalThemeObj);
+      setDeck(updatedDeck);
+      setVisualTheme(globalThemeObj);
+    } catch (err) {
+      alert(`Failed to save global theme: ${err.message}`);
     }
   }
 
@@ -521,6 +528,13 @@ export default function DeckEditor() {
           <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {currentSlide ? (
               <div style={{ width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Figma Visual Typography & Color Studio Toolbar */}
+                <FigmaTypographyToolbar
+                  currentTheme={visualTheme}
+                  onChangeTheme={theme => setVisualTheme(theme)}
+                  onSaveGlobalTheme={handleSaveGlobalTheme}
+                />
+
                 {/* Slide Action Bar (Type Selector, Layout & Delete) */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -585,19 +599,20 @@ export default function DeckEditor() {
                 {/* Presentation Canvas Box */}
                 <div style={{
                   width: '100%', minHeight: 480,
-                  background: bgPreset.style.background,
-                  backgroundImage: bgPreset.style.backgroundImage,
+                  background: visualTheme.bgColor || bgPreset.style.background,
+                  backgroundImage: visualTheme.bgColor ? 'none' : bgPreset.style.backgroundImage,
                   backgroundSize: bgPreset.style.backgroundSize || 'cover',
-                  color: '#ffffff',
+                  color: visualTheme.textColor || '#ffffff',
+                  fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
                   borderRadius: 14, border: `1px solid ${bgPreset.style.border}`,
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
                   padding: '40px 48px', display: 'flex', flexDirection: 'column',
-                  justify: 'space-between', position: 'relative', transition: 'all 0.2s ease',
+                  justifyContent: 'space-between', position: 'relative', transition: 'all 0.2s ease',
                 }}>
                   {/* Left Accent Bar */}
                   <div style={{
                     position: 'absolute', top: 0, left: 0, bottom: 0, width: 6,
-                    background: bgPreset.style.accent, borderTopLeftRadius: 14, borderBottomLeftRadius: 14,
+                    background: visualTheme.accentColor || bgPreset.style.accent, borderTopLeftRadius: 14, borderBottomLeftRadius: 14,
                   }} />
 
                   <div>
@@ -605,7 +620,7 @@ export default function DeckEditor() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                       <span style={{ fontSize: 18 }}>{SLIDE_TYPE_ICONS[slideType] || '📄'}</span>
                       <span style={{
-                        fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', uppercase: 'true',
+                        fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
                         background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: 4,
                       }}>
                         {slideType.replace(/_/g, ' ')}
@@ -620,8 +635,14 @@ export default function DeckEditor() {
                       style={{
                         width: '100%', background: 'transparent', border: 'none',
                         borderBottom: '2px dashed rgba(255,255,255,0.2)',
-                        fontSize: slideType === 'title' ? 34 : 26, fontWeight: 800,
-                        color: '#ffffff', outline: 'none', padding: '4px 0', marginBottom: 12,
+                        fontSize: slideType === 'title' ? 34 : 26,
+                        fontWeight: visualTheme.fontWeight || 800,
+                        fontFamily: visualTheme.headingFont ? `'${visualTheme.headingFont}', sans-serif` : 'inherit',
+                        letterSpacing: visualTheme.letterSpacing || 'normal',
+                        lineHeight: visualTheme.lineHeight || 1.2,
+                        textTransform: visualTheme.textTransform || 'none',
+                        color: visualTheme.titleColor || '#ffffff',
+                        outline: 'none', padding: '4px 0', marginBottom: 12,
                       }}
                     />
 
@@ -634,8 +655,11 @@ export default function DeckEditor() {
                       style={{
                         width: '100%', background: 'transparent', border: 'none',
                         borderBottom: '1px dashed rgba(255,255,255,0.15)',
-                        fontSize: 14, color: 'rgba(255,255,255,0.85)', outline: 'none',
-                        resize: 'vertical', padding: '4px 0', marginBottom: 20, lineHeight: 1.4,
+                        fontSize: 14,
+                        fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
+                        color: visualTheme.textColor || 'rgba(255,255,255,0.85)',
+                        outline: 'none', resize: 'vertical', padding: '4px 0', marginBottom: 20,
+                        lineHeight: visualTheme.lineHeight || 1.4,
                       }}
                     />
                   </div>
@@ -655,14 +679,16 @@ export default function DeckEditor() {
                           </div>
                           {slideContent.bullets.map((b, bi) => (
                             <div key={bi} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span style={{ color: bgPreset.style.accent, fontWeight: 800 }}>•</span>
+                              <span style={{ color: visualTheme.accentColor || bgPreset.style.accent, fontWeight: 800 }}>•</span>
                               <input
                                 value={b}
                                 onChange={e => updateBullet(bi, e.target.value)}
                                 style={{
                                   flex: 1, background: 'rgba(255,255,255,0.06)',
                                   border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6,
-                                  color: '#ffffff', padding: '6px 10px', fontSize: 13, outline: 'none',
+                                  color: visualTheme.textColor || '#ffffff',
+                                  fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
+                                  padding: '6px 10px', fontSize: 13, outline: 'none',
                                 }}
                               />
                               <button
@@ -707,7 +733,8 @@ export default function DeckEditor() {
                                   onChange={e => updateMember(mi, 'name', e.target.value)}
                                   style={{
                                     flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)',
-                                    color: '#fff', padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700,
+                                    color: visualTheme.titleColor || '#fff', padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700,
+                                    fontFamily: visualTheme.headingFont ? `'${visualTheme.headingFont}', sans-serif` : 'inherit',
                                   }}
                                 />
                                 <input
@@ -716,7 +743,7 @@ export default function DeckEditor() {
                                   onChange={e => updateMember(mi, 'role', e.target.value)}
                                   style={{
                                     flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)',
-                                    color: '#38bdf8', padding: '4px 8px', borderRadius: 4, fontSize: 12,
+                                    color: visualTheme.accentColor || '#38bdf8', padding: '4px 8px', borderRadius: 4, fontSize: 12,
                                   }}
                                 />
                                 <button onClick={() => deleteMember(mi)} style={{ background: 'none', border: 'none', color: '#f43f5e', cursor: 'pointer' }}>✕</button>
@@ -727,7 +754,8 @@ export default function DeckEditor() {
                                 onChange={e => updateMember(mi, 'bio', e.target.value)}
                                 style={{
                                   background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)',
-                                  color: 'rgba(255,255,255,0.8)', padding: '4px 8px', borderRadius: 4, fontSize: 11,
+                                  color: visualTheme.textColor || 'rgba(255,255,255,0.8)', padding: '4px 8px', borderRadius: 4, fontSize: 11,
+                                  fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
                                 }}
                               />
                             </div>
@@ -748,9 +776,12 @@ export default function DeckEditor() {
                           onChange={e => updateCallout(e.target.value)}
                           placeholder="Add key takeaway, metric callout, or contact info..."
                           style={{
-                            width: '100%', background: 'rgba(14, 165, 233, 0.15)',
-                            border: '1px solid rgba(14, 165, 233, 0.4)', borderRadius: 8,
-                            padding: '8px 12px', fontSize: 12, fontWeight: 600, color: '#38bdf8', outline: 'none',
+                            width: '100%',
+                            background: visualTheme.accentColor ? `${visualTheme.accentColor}22` : 'rgba(14, 165, 233, 0.15)',
+                            border: `1px solid ${visualTheme.accentColor ? `${visualTheme.accentColor}66` : 'rgba(14, 165, 233, 0.4)'}`,
+                            borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600,
+                            color: visualTheme.accentColor || '#38bdf8', outline: 'none',
+                            fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
                           }}
                         />
                       </div>
@@ -763,7 +794,7 @@ export default function DeckEditor() {
                         borderRadius: 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column',
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: '#38bdf8' }}>📊 {slideChartData.title || 'Chart'}</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: visualTheme.accentColor || '#38bdf8' }}>📊 {slideChartData.title || 'Chart'}</span>
                           <button className="btn-secondary" onClick={() => setShowChartModal(true)} style={{ fontSize: 10, padding: '2px 6px' }}>Edit Chart</button>
                         </div>
                         <div style={{ flex: 1, position: 'relative' }}>

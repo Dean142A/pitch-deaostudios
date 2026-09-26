@@ -302,6 +302,59 @@ async function addSlide(deckId, slideData = {}, userId) {
   return result.rows[0];
 }
 
+async function duplicateSlide(slideId, deckId, userId) {
+  const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
+  if (!deck.rows[0]) throw new Error('Deck not found');
+  if (deck.rows[0].owner_id !== userId) throw new Error('Forbidden: not deck owner');
+
+  const origRes = await pool.query(`SELECT * FROM slides WHERE id = $1 AND deck_id = $2`, [slideId, deckId]);
+  if (!origRes.rows[0]) throw new Error('Target slide to duplicate not found');
+  const orig = origRes.rows[0];
+
+  const targetOrder = orig.slide_order;
+  // Shift subsequent slides
+  await pool.query(`UPDATE slides SET slide_order = slide_order + 1 WHERE deck_id = $1 AND slide_order > $2`, [deckId, targetOrder]);
+
+  const origContent = typeof orig.content === 'string' ? JSON.parse(orig.content) : (orig.content || {});
+  const duplicatedContent = {
+    ...origContent,
+    title: `${origContent.title || origContent.headline || 'Slide'} (Copy)`,
+  };
+
+  const result = await pool.query(
+    `INSERT INTO slides (deck_id, slide_type, slide_order, content, chart_data, layout)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [
+      deckId,
+      orig.slide_type,
+      targetOrder + 1,
+      JSON.stringify(duplicatedContent),
+      orig.chart_data ? JSON.stringify(orig.chart_data) : null,
+      orig.layout || 'single_column',
+    ]
+  );
+  return result.rows[0];
+}
+
+async function updateDeckTheme(deckId, globalTheme = {}, userId) {
+  const deck = await pool.query(`SELECT owner_id, input_data FROM decks WHERE id = $1`, [deckId]);
+  if (!deck.rows[0]) throw new Error('Deck not found');
+  if (deck.rows[0].owner_id !== userId) throw new Error('Forbidden: not deck owner');
+
+  let inputData = deck.rows[0].input_data || {};
+  if (typeof inputData === 'string') {
+    try { inputData = JSON.parse(inputData); } catch { inputData = {}; }
+  }
+
+  inputData.globalTheme = globalTheme;
+
+  const result = await pool.query(
+    `UPDATE decks SET input_data = $1, updated_at = now() WHERE id = $2 RETURNING *`,
+    [JSON.stringify(inputData), deckId]
+  );
+  return result.rows[0];
+}
+
 async function deleteSlide(slideId, deckId, userId) {
   const deck = await pool.query(`SELECT owner_id FROM decks WHERE id = $1`, [deckId]);
   if (!deck.rows[0]) throw new Error('Deck not found');

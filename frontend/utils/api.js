@@ -52,10 +52,12 @@ const api = {
   getTemplate: (id) => request('GET', `/api/templates/${id}`),
   useTemplate: (id, data = {}) => request('POST', `/api/templates/${id}/use`, data),
 
-  // Slides
+  // Slides & Theme
   addSlide: (deckId, data = {}) => request('POST', `/api/decks/${deckId}/slides`, data),
+  duplicateSlide: (deckId, slideId) => request('POST', `/api/decks/${deckId}/slides/${slideId}/duplicate`),
   updateSlide: (deckId, slideId, data) => request('PUT', `/api/decks/${deckId}/slides/${slideId}`, data),
   deleteSlide: (deckId, slideId) => request('DELETE', `/api/decks/${deckId}/slides/${slideId}`),
+  updateDeckTheme: (deckId, globalTheme) => request('PUT', `/api/decks/${deckId}/theme`, globalTheme),
 
   // Versions
   getVersions: (deckId) => request('GET', `/api/decks/${deckId}/versions`),
