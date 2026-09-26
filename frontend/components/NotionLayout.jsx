@@ -1,4 +1,4 @@
-// components/NotionLayout.jsx - Notion-Style Sidebar & Navigation Layout
+// components/NotionLayout.jsx - Create UI Studio Hybrid Layout
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -18,41 +18,88 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
       const me = await api.me();
       setUser(me);
     } catch {
-      // Unauthenticated, router will redirect if needed on page load
+      // Unauthenticated, router handles redirects on page level
     }
   }
 
   function handleLogout() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('deao_token');
+      localStorage.removeItem('deao_user');
       router.push('/login');
     }
   }
 
   const navItems = [
-    { id: 'templates', label: 'Ready-Made Templates', icon: '⬡', path: '/?tab=templates' },
-    { id: 'new', label: 'AI Deck Creator', icon: '+', path: '/?tab=ai', primary: true },
-    { id: 'dashboard', label: 'All Decks', icon: '▤', path: '/dashboard' },
-    { id: 'admin', label: 'Admin Settings', icon: '⚙', path: '/admin', adminOnly: true },
+    {
+      id: 'templates',
+      label: 'Ready-Made Templates',
+      path: '/?tab=templates',
+      svg: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      )
+    },
+    {
+      id: 'new',
+      label: 'AI Deck Creator',
+      path: '/?tab=ai',
+      primary: true,
+      svg: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      )
+    },
+    {
+      id: 'dashboard',
+      label: 'All Pitch Decks',
+      path: '/dashboard',
+      svg: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+        </svg>
+      )
+    },
+    {
+      id: 'admin',
+      label: 'Admin Settings',
+      path: '/admin',
+      adminOnly: true,
+      svg: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )
+    },
   ];
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
-      {/* Notion Sidebar */}
+      {/* Studio Glass Sidebar */}
       <aside style={{
-        width: collapsed ? 64 : 240,
-        background: 'var(--bg-sidebar)',
+        width: collapsed ? 68 : 250,
+        background: 'rgba(14, 17, 26, 0.95)',
+        backdropFilter: 'blur(16px)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'width 0.2s ease',
+        transition: 'width 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         flexShrink: 0,
         zIndex: 50,
       }}>
         {/* Workspace Brand Header */}
         <div style={{
-          height: 56,
-          padding: '0 16px',
+          height: 60,
+          padding: '0 18px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -61,14 +108,21 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
           {!collapsed && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 28, height: 28, borderRadius: 6,
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                width: 32, height: 32, borderRadius: 8,
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 800, fontSize: 13,
-              }}>⬡</div>
+                color: 'white', fontWeight: 900, fontSize: 14,
+                boxShadow: '0 0 16px rgba(99, 102, 241, 0.4)',
+              }}>
+                ✦
+              </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>Deao Studios</div>
-                <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Pitch Generator</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+                  DEAO STUDIOS
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  PITCH STUDIO
+                </div>
               </div>
             </div>
           )}
@@ -77,17 +131,24 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             style={{
-              background: 'none', border: 'none', color: 'var(--text-muted)',
-              cursor: 'pointer', padding: 6, borderRadius: 6, display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border)',
+              color: 'var(--text-muted)', cursor: 'pointer', padding: 6, borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.15s ease',
             }}
           >
-            {collapsed ? '➔' : '◀'}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {collapsed ? (
+                <polyline points="13 17 18 12 13 7" />
+              ) : (
+                <polyline points="11 17 6 12 11 7" />
+              )}
+            </svg>
           </button>
         </div>
 
         {/* Navigation List */}
-        <div style={{ padding: '12px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ padding: '16px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {navItems.map(item => {
             if (item.adminOnly && user?.role !== 'admin') return null;
             const isActive = activeTab === item.id;
@@ -97,42 +158,47 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '8px 12px',
-                  borderRadius: 6,
+                  gap: 12,
+                  padding: '10px 14px',
+                  borderRadius: 8,
                   background: item.primary
-                    ? (isActive ? 'var(--accent)' : 'rgba(99, 102, 241, 0.12)')
-                    : (isActive ? 'var(--bg-card)' : 'transparent'),
-                  color: item.primary ? (isActive ? '#ffffff' : 'var(--accent-2)') : (isActive ? '#ffffff' : 'var(--text-muted)'),
-                  border: item.primary ? '1px solid rgba(99, 102, 241, 0.3)' : (isActive ? '1px solid var(--border)' : '1px solid transparent'),
+                    ? (isActive ? 'var(--accent-gradient)' : 'rgba(99, 102, 241, 0.12)')
+                    : (isActive ? 'var(--bg-hover)' : 'transparent'),
+                  color: item.primary ? '#ffffff' : (isActive ? '#ffffff' : 'var(--text-muted)'),
+                  border: item.primary
+                    ? (isActive ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(99, 102, 241, 0.35)')
+                    : (isActive ? '1px solid var(--border-highlight)' : '1px solid transparent'),
                   fontSize: 13,
                   fontWeight: isActive || item.primary ? 600 : 400,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  boxShadow: isActive && item.primary ? '0 4px 14px rgba(99, 102, 241, 0.35)' : 'none',
                 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700 }}>{item.icon}</span>
-                  {!collapsed && <span>{item.label}</span>}
+                  <span style={{ color: isActive ? '#06b6d4' : (item.primary ? '#ffffff' : 'var(--text-muted)'), display: 'flex' }}>
+                    {item.svg}
+                  </span>
+                  {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>}
                 </div>
               </Link>
             );
           })}
 
           {!collapsed && (
-            <div style={{ marginTop: 24, padding: '0 8px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
-                TEMPLATES & STYLES
+            <div style={{ marginTop: 28, padding: '0 10px' }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+                DESIGN THEMES
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }}></span>
-                  Modern Tech
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }}></span>
+                  Modern Tech Studio
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0ea5e9' }}></span>
-                  Corporate Blue
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#06b6d4', boxShadow: '0 0 8px #06b6d4' }}></span>
+                  Corporate Cyan
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderRadius: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f43f5e' }}></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f43f5e', boxShadow: '0 0 8px #f43f5e' }}></span>
                   Creative Rose
                 </div>
               </div>
@@ -143,27 +209,29 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
         {/* User Account Footer */}
         {user && (
           <div style={{
-            padding: '12px 16px',
+            padding: '14px 18px',
             borderTop: '1px solid var(--border-light)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            background: 'rgba(0,0,0,0.2)',
           }}>
             {!collapsed && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
                 <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: 'var(--accent)', color: 'white',
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: 'var(--accent-gradient)', color: 'white',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 700, flexShrink: 0,
+                  fontSize: 13, fontWeight: 800, flexShrink: 0,
+                  boxShadow: '0 0 10px rgba(99, 102, 241, 0.4)',
                 }}>
                   {user.name?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <div style={{ overflow: 'hidden' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                     {user.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-subtle)', textTransform: 'capitalize' }}>
+                  <div style={{ fontSize: 10, color: '#06b6d4', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {user.role || 'editor'}
                   </div>
                 </div>
@@ -173,8 +241,9 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
               onClick={handleLogout}
               title="Sign Out"
               style={{
-                background: 'none', border: 'none', color: 'var(--text-subtle)',
-                cursor: 'pointer', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#f87171', cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                padding: '4px 8px', borderRadius: 6, transition: 'all 0.15s ease',
               }}
             >
               Exit
@@ -183,28 +252,40 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
         )}
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Studio Workspace Area */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Top Notion Breadcrumb Navigation */}
+        {/* Top Breadcrumb & Status Header */}
         <header style={{
-          height: 56,
-          padding: '0 24px',
+          height: 60,
+          padding: '0 28px',
           borderBottom: '1px solid var(--border)',
-          background: 'rgba(15, 17, 23, 0.8)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(9, 11, 16, 0.85)',
+          backdropFilter: 'blur(16px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           zIndex: 40,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>Workspace</span>
-            <span>/</span>
-            <span style={{ color: 'var(--text)', fontWeight: 600 }}>{title}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-muted)' }}>
+            <span style={{ fontWeight: 500 }}>Workspace</span>
+            <span style={{ opacity: 0.4 }}>/</span>
+            <span style={{ color: 'var(--text)', fontWeight: 700, letterSpacing: '-0.01em' }}>{title}</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Live API Status Indicator */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: 20, padding: '4px 12px', fontSize: 11, fontWeight: 600, color: '#34d399',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} className="animate-pulse-glow" />
+              <span>System Online</span>
+            </div>
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Page Container */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {children}
         </div>
@@ -212,3 +293,4 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
     </div>
   );
 }
+

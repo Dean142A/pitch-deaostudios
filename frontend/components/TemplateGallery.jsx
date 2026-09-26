@@ -1,4 +1,4 @@
-// frontend/components/TemplateGallery.jsx
+// frontend/components/TemplateGallery.jsx - Create UI Ready-Made Template Gallery
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api from '../utils/api';
@@ -69,8 +69,8 @@ export default function TemplateGallery({ onSelectTemplate }) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-        <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 320 }}>
+        <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
       </div>
     );
   }
@@ -79,22 +79,26 @@ export default function TemplateGallery({ onSelectTemplate }) {
     <div>
       {/* Category Pills & Search */}
       <div style={{
-        display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24,
+        display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 28,
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: 12,
+          flexWrap: 'wrap', gap: 14,
         }}>
           {/* Search bar */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-card)',
-            border: '1px solid var(--border)', borderRadius: 8, padding: '8px 14px', flex: 1, minWidth: 260,
+            display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(14, 18, 27, 0.8)',
+            border: '1px solid var(--border)', borderRadius: 10, padding: '10px 16px', flex: 1, minWidth: 280,
+            backdropFilter: 'blur(12px)',
           }}>
-            <span style={{ color: 'var(--text-subtle)' }}>🔍</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--text-subtle)' }}>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               className="input"
               style={{ border: 'none', background: 'transparent', padding: 0 }}
-              placeholder="Search templates by industry, topic, or keyword..."
+              placeholder="Search ready-made templates by keyword or industry..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -112,11 +116,11 @@ export default function TemplateGallery({ onSelectTemplate }) {
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               style={{
-                background: selectedCategory === cat ? 'var(--accent)' : 'var(--bg-card)',
+                background: selectedCategory === cat ? 'var(--accent-gradient)' : 'var(--bg-card)',
                 color: selectedCategory === cat ? '#ffffff' : 'var(--text-muted)',
-                border: selectedCategory === cat ? '1px solid var(--accent)' : '1px solid var(--border)',
-                borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 600,
-                cursor: 'pointer', whitespace: 'nowrap', transition: 'all 0.15s ease',
+                border: selectedCategory === cat ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)',
+                borderRadius: 20, padding: '7px 16px', fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s ease',
               }}
             >
               {cat}
@@ -127,8 +131,8 @@ export default function TemplateGallery({ onSelectTemplate }) {
 
       {/* Templates Grid */}
       <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-        gap: 20,
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+        gap: 24,
       }}>
         {filtered.map(t => {
           const bgPreset = getBackgroundPreset(t.backgroundPreset || 'dark-obsidian');
@@ -140,31 +144,33 @@ export default function TemplateGallery({ onSelectTemplate }) {
               className="notion-card"
               style={{
                 padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                justify: 'space-between', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                justifyContent: 'space-between', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               }}
             >
               {/* Card Preset Background Banner Header */}
               <div style={{
-                height: 140,
+                height: 145,
                 background: bgPreset.style.background,
                 backgroundImage: bgPreset.style.backgroundImage,
                 backgroundSize: bgPreset.style.backgroundSize || 'cover',
-                padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                padding: 18, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
                 position: 'relative', borderBottom: '1px solid var(--border)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{
-                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
-                    color: '#38bdf8', padding: '3px 10px', borderRadius: 12,
-                    fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
+                    color: '#06b6d4', padding: '4px 12px', borderRadius: 20,
+                    fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
                   }}>
                     {t.category}
                   </span>
                   {t.badge && (
                     <span style={{
                       background: 'linear-gradient(135deg, #f43f5e, #e11d48)',
-                      color: '#ffffff', padding: '3px 10px', borderRadius: 12,
-                      fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em',
+                      color: '#ffffff', padding: '4px 12px', borderRadius: 20,
+                      fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em',
+                      boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)',
                     }}>
                       {t.badge}
                     </span>
@@ -172,17 +178,17 @@ export default function TemplateGallery({ onSelectTemplate }) {
                 </div>
 
                 <div>
-                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#ffffff', dropShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#ffffff' }}>
                     {t.name}
                   </h3>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', marginTop: 4, fontWeight: 500 }}>
                     {t.numSlides} Pre-Built Slides • Theme: {bgPreset.name}
                   </div>
                 </div>
               </div>
 
               {/* Card Body */}
-              <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   {t.description}
                 </p>
@@ -193,7 +199,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
                     {t.tags.map(tag => (
                       <span key={tag} style={{
                         background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
-                        color: 'var(--text-subtle)', borderRadius: 4, padding: '2px 8px', fontSize: 11,
+                        color: 'var(--text-subtle)', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 600,
                       }}>
                         #{tag}
                       </span>
@@ -202,22 +208,22 @@ export default function TemplateGallery({ onSelectTemplate }) {
                 )}
 
                 {/* Card Actions */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <button
                     className="btn-secondary"
                     onClick={() => handleOpenPreview(t.id)}
-                    style={{ fontSize: 12, padding: '8px 12px', justifyContent: 'center' }}
+                    style={{ fontSize: 12, padding: '9px 14px', justifyContent: 'center' }}
                   >
-                    👁️ Preview
+                    <span>Preview Deck</span>
                   </button>
 
                   <button
                     className="btn-primary"
                     onClick={() => handleUseTemplate(t.id)}
                     disabled={isCreating}
-                    style={{ fontSize: 12, padding: '8px 12px', justifyContent: 'center', fontWeight: 700 }}
+                    style={{ fontSize: 12, padding: '9px 14px', justifyContent: 'center', fontWeight: 700 }}
                   >
-                    {isCreating ? 'Creating...' : '🚀 Use Template'}
+                    {isCreating ? 'Creating...' : 'Use Template'}
                   </button>
                 </div>
               </div>
@@ -240,3 +246,4 @@ export default function TemplateGallery({ onSelectTemplate }) {
     </div>
   );
 }
+
