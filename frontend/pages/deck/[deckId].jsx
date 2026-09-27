@@ -234,6 +234,49 @@ export default function DeckEditor() {
     triggerSave(updated);
   };
 
+  const updateBody = (val) => {
+    const updated = { ...slideContent, body: val };
+    triggerSave(updated);
+  };
+
+  const addBody = () => {
+    const updated = { ...slideContent, body: 'Enter custom body text paragraph or core message here...' };
+    triggerSave(updated);
+  };
+
+  const deleteBody = () => {
+    const { body, description, ...rest } = slideContent;
+    triggerSave(rest);
+  };
+
+  const updateFooter = (val) => {
+    const updated = { ...slideContent, footer: val };
+    triggerSave(updated);
+  };
+
+  const updateChartTitle = (val) => {
+    if (!slideChartData) return;
+    const updatedChart = { ...slideChartData, title: val };
+    setSlideChartData(updatedChart);
+    triggerSave(slideContent, updatedChart, slideType, slideLayout);
+  };
+
+  const updateMetric = (idx, field, val) => {
+    const metrics = [...(slideContent.metrics || [])];
+    metrics[idx] = { ...metrics[idx], [field]: val };
+    triggerSave({ ...slideContent, metrics });
+  };
+
+  const addMetric = () => {
+    const metrics = [...(slideContent.metrics || []), { value: '$5.0M+', label: 'Annual Revenue Growth' }];
+    triggerSave({ ...slideContent, metrics });
+  };
+
+  const deleteMetric = (idx) => {
+    const metrics = (slideContent.metrics || []).filter((_, i) => i !== idx);
+    triggerSave({ ...slideContent, metrics });
+  };
+
   const updateBullet = (idx, val) => {
     const bullets = [...(slideContent.bullets || [])];
     bullets[idx] = val;
@@ -542,6 +585,8 @@ export default function DeckEditor() {
   const bgPreset = getBackgroundPreset(currentBgId);
   const slideTitleVal = slideContent.title || slideContent.headline || slideContent.name || '';
   const slideSubtitleVal = slideContent.subtitle || slideContent.subheadline || slideContent.description || '';
+  const slideBodyVal = slideContent.body || (slideContent.bullets?.length ? '' : slideContent.description || '');
+  const slideFooterVal = slideContent.footer || 'Pitch Deck Generator';
   const positions = slideContent.positions || {};
 
   if (!deck) return (
@@ -693,13 +738,7 @@ export default function DeckEditor() {
                     transition: 'all 0.15s ease', position: 'relative',
                   }}
                 >
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, bottom: 0, width: 4,
-                    background: visualTheme.accentColor || bgPreset.style.accent,
-                    borderTopLeftRadius: 8, borderBottomLeftRadius: 8,
-                  }} />
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: visualTheme.titleColor || bgPreset.style.color, paddingLeft: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: visualTheme.titleColor || bgPreset.style.color }}>
                     <span style={{ fontWeight: 700 }}>Slide {idx + 1}</span>
                     <span style={{ textTransform: 'capitalize', opacity: 0.8 }}>{s.slide_type?.replace(/_/g, ' ')}</span>
                   </div>
@@ -707,7 +746,7 @@ export default function DeckEditor() {
                   <div style={{
                     fontSize: 11, fontWeight: 700, color: visualTheme.titleColor || bgPreset.style.color,
                     fontFamily: visualTheme.headingFont ? `'${visualTheme.headingFont}', sans-serif` : 'inherit',
-                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 6, paddingLeft: 6,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 6,
                   }}>
                     {sTitle}
                   </div>
@@ -715,14 +754,14 @@ export default function DeckEditor() {
                   {sSubtitle && (
                     <div style={{
                       fontSize: 10, color: visualTheme.textColor || 'rgba(255,255,255,0.7)',
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2, paddingLeft: 6, opacity: 0.85,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2, opacity: 0.85,
                     }}>
                       {sSubtitle}
                     </div>
                   )}
 
                   {sContent.widgets && sContent.widgets.length > 0 && (
-                    <div style={{ fontSize: 9, fontWeight: 700, color: visualTheme.accentColor || 'var(--accent)', marginTop: 4, paddingLeft: 6 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: visualTheme.accentColor || 'var(--accent)', marginTop: 4 }}>
                       [{sContent.widgets.length} Widget{sContent.widgets.length > 1 ? 's' : ''}]
                     </div>
                   )}
@@ -740,11 +779,15 @@ export default function DeckEditor() {
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   background: 'rgba(18, 22, 34, 0.85)', backdropFilter: 'blur(12px)',
-                  border: '1px solid var(--border)', borderRadius: 10, padding: '8px 16px', gap: 12, flexWrap: 'wrap',
+                  border: '1px solid var(--border)', borderRadius: 10, padding: '8px 16px', gap: 10, flexWrap: 'wrap',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>CANVAS TOOLBAR:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>ADD ELEMENT:</span>
+                    <button className="btn-secondary" onClick={addBullet} style={{ fontSize: 11, padding: '4px 8px' }}>+ Bullet</button>
+                    <button className="btn-secondary" onClick={addBody} style={{ fontSize: 11, padding: '4px 8px' }}>+ Paragraph</button>
+                    <button className="btn-secondary" onClick={addMember} style={{ fontSize: 11, padding: '4px 8px' }}>+ Team Member</button>
+                    <button className="btn-secondary" onClick={addMetric} style={{ fontSize: 11, padding: '4px 8px' }}>+ Metric</button>
                     <button className="btn-secondary" onClick={() => addWidget('stat_card')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Stat Card</button>
                     <button className="btn-secondary" onClick={() => addWidget('text_box')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Text Box</button>
                     <button className="btn-secondary" onClick={() => addWidget('callout_box')} style={{ fontSize: 11, padding: '4px 8px' }}>+ Callout</button>
@@ -795,14 +838,6 @@ export default function DeckEditor() {
                   padding: '40px 48px', display: 'flex', flexDirection: 'column',
                   justifyContent: 'space-between', position: 'relative', transition: 'background 0.2s ease',
                 }}>
-                  {/* Left Accent Bar */}
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, bottom: 0, width: 6,
-                    background: visualTheme.accentColor || bgPreset.style.accent,
-                    borderTopLeftRadius: visualTheme.borderRadius || '14px',
-                    borderBottomLeftRadius: visualTheme.borderRadius || '14px',
-                  }} />
-
                   {/* Header / Title Group */}
                   <div
                     onClick={() => setSelectedBlock('title_group')}
@@ -874,7 +909,7 @@ export default function DeckEditor() {
                     display: 'grid', gridTemplateColumns: slideChartData && slideChartData.type !== 'none' ? '1fr 1fr' : '1fr',
                     gap: 24, flex: 1, margin: '16px 0',
                   }}>
-                    {/* Left Column: Bullets / Members / Widgets */}
+                    {/* Left Column: Bullets / Members / Body / Metrics / Widgets */}
                     <div
                       onClick={() => setSelectedBlock('body_group')}
                       style={{
@@ -893,6 +928,29 @@ export default function DeckEditor() {
                       >
                         ::: DRAG CONTENT SECTION
                       </div>
+
+                      {/* Editable Body Paragraph */}
+                      {slideBodyVal ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>PARAGRAPH BODY</span>
+                            <button onClick={deleteBody} style={{ background: 'none', border: 'none', color: '#f43f5e', cursor: 'pointer', fontSize: 12 }}>✕</button>
+                          </div>
+                          <textarea
+                            rows={3}
+                            value={slideBodyVal}
+                            onChange={e => updateBody(e.target.value)}
+                            placeholder="Enter main text paragraph..."
+                            style={{
+                              width: '100%', background: 'rgba(255,255,255,0.04)',
+                              border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 6,
+                              color: visualTheme.textColor || '#ffffff',
+                              fontFamily: visualTheme.bodyFont ? `'${visualTheme.bodyFont}', sans-serif` : 'inherit',
+                              padding: '8px 10px', fontSize: 13, outline: 'none', resize: 'vertical',
+                            }}
+                          />
+                        </div>
+                      ) : null}
 
                       {/* Editable Bullets */}
                       {slideContent.bullets && slideContent.bullets.length > 0 ? (
@@ -938,11 +996,13 @@ export default function DeckEditor() {
                             + Add Bullet Point
                           </button>
                         </div>
-                      ) : slideContent.members && slideContent.members.length > 0 ? (
-                        /* Editable Team Members */
+                      ) : null}
+
+                      {/* Editable Team Members */}
+                      {slideContent.members && slideContent.members.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
-                            TEAM MEMBERS
+                            TEAM MEMBERS ({slideContent.members.length})
                           </div>
                           {slideContent.members.map((m, mi) => (
                             <div key={mi} style={{
@@ -990,10 +1050,63 @@ export default function DeckEditor() {
                         </div>
                       ) : null}
 
+                      {/* Editable Metrics / Stat Cards Array */}
+                      {slideContent.metrics && slideContent.metrics.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' }}>
+                            KEY METRICS ({slideContent.metrics.length})
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+                            {slideContent.metrics.map((met, meti) => (
+                              <div key={meti} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <input
+                                    value={met.value || ''}
+                                    onChange={e => updateMetric(meti, 'value', e.target.value)}
+                                    placeholder="$10M+"
+                                    style={{ background: 'transparent', border: 'none', fontSize: 16, fontWeight: 800, color: visualTheme.accentColor || '#38bdf8', width: '80%', outline: 'none' }}
+                                  />
+                                  <button onClick={() => deleteMetric(meti)} style={{ background: 'none', border: 'none', color: '#f43f5e', cursor: 'pointer', fontSize: 10 }}>✕</button>
+                                </div>
+                                <input
+                                  value={met.label || ''}
+                                  onChange={e => updateMetric(meti, 'label', e.target.value)}
+                                  placeholder="Metric Label"
+                                  style={{ background: 'transparent', border: 'none', fontSize: 11, color: visualTheme.textColor || '#fff', outline: 'none' }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <button onClick={addMetric} style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px dashed rgba(255,255,255,0.3)', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}>
+                            + Add Metric Card
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {/* Empty Content Block Builder Prompt */}
+                      {!slideContent.bullets?.length && !slideContent.members?.length && !slideBodyVal && !slideContent.metrics?.length && (
+                        <div style={{
+                          padding: 16, border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 8,
+                          display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start',
+                          background: 'rgba(255,255,255,0.02)',
+                        }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>SLIDE CONTENT SECTION:</span>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button onClick={addBullet} style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>+ Bullet Points</button>
+                            <button onClick={addBody} style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>+ Body Paragraph</button>
+                            <button onClick={addMember} style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>+ Team Members</button>
+                            <button onClick={addMetric} style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>+ Metric Card</button>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Editable Callout Box */}
                       <div style={{ marginTop: 12 }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: 4 }}>
-                          CALLOUT BOX (HIGHLIGHT)
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>CALLOUT BOX (HIGHLIGHT)</span>
+                          {slideContent.callout && (
+                            <button onClick={() => updateCallout('')} style={{ background: 'none', border: 'none', color: '#f43f5e', cursor: 'pointer', fontSize: 11 }}>Clear Callout</button>
+                          )}
                         </div>
                         <input
                           value={slideContent.callout || ''}
@@ -1099,7 +1212,7 @@ export default function DeckEditor() {
                       )}
                     </div>
 
-                    {/* Right Column: Chart (Draggable) */}
+                    {/* Right Column: Chart (Draggable & Title Editable) */}
                     {slideChartData && slideChartData.type !== 'none' && (
                       <div
                         onClick={() => setSelectedBlock('chart_group')}
@@ -1107,15 +1220,23 @@ export default function DeckEditor() {
                           transform: `translate(${positions.chart_group?.x || 0}px, ${positions.chart_group?.y || 0}px)`,
                           background: 'rgba(0,0,0,0.4)',
                           border: selectedBlock === 'chart_group' ? '1px dashed var(--accent)' : (visualTheme.borderEnabled !== false ? `${visualTheme.borderWidth || '1px'} ${visualTheme.borderStyle || 'solid'} ${visualTheme.borderColor || 'rgba(255,255,255,0.15)'}` : 'none'),
-                          borderRadius: visualTheme.borderRadius || 10, padding: 16, height: 240, display: 'flex', flexDirection: 'column', position: 'relative',
+                          borderRadius: visualTheme.borderRadius || 10, padding: 16, height: 260, display: 'flex', flexDirection: 'column', position: 'relative',
                         }}
                       >
                         <div onMouseDown={e => handleDragStart(e, 'chart_group')} style={{ cursor: 'grab', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-                          ::: DRAG CHART
+                          ::: DRAG CHART BLOCK
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: visualTheme.accentColor || '#38bdf8' }}>Chart: {slideChartData.title || 'Performance'}</span>
-                          <button className="btn-secondary" onClick={() => setShowChartModal(true)} style={{ fontSize: 10, padding: '2px 6px' }}>Edit Chart</button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+                          <input
+                            value={slideChartData.title || ''}
+                            onChange={e => updateChartTitle(e.target.value)}
+                            placeholder="Chart Title..."
+                            style={{
+                              background: 'transparent', border: 'none', borderBottom: '1px dashed rgba(255,255,255,0.3)',
+                              fontSize: 12, fontWeight: 700, color: visualTheme.accentColor || '#38bdf8', outline: 'none', flex: 1,
+                            }}
+                          />
+                          <button className="btn-secondary" onClick={() => setShowChartModal(true)} style={{ fontSize: 10, padding: '2px 8px' }}>Edit Chart Data</button>
                         </div>
                         <div style={{ flex: 1, position: 'relative' }}>
                           <ChartComponent data={slideChartData} />
@@ -1124,12 +1245,20 @@ export default function DeckEditor() {
                     )}
                   </div>
 
-                  {/* Canvas Footer */}
+                  {/* Canvas Footer (Editable) */}
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    fontSize: 11, opacity: 0.6, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: 11, opacity: 0.7, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)',
                   }}>
-                    <span>Pitch Deck Generator</span>
+                    <input
+                      value={slideFooterVal}
+                      onChange={e => updateFooter(e.target.value)}
+                      placeholder="Footer text / Copyright..."
+                      style={{
+                        background: 'transparent', border: 'none', color: visualTheme.textColor || 'rgba(255,255,255,0.6)',
+                        fontSize: 11, outline: 'none', width: '50%',
+                      }}
+                    />
                     <span>Slide {selectedSlide + 1} of {slides.length}</span>
                   </div>
                 </div>

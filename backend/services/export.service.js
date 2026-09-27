@@ -84,7 +84,6 @@ async function exportToPptx(deck, slides, filename) {
     })();
 
     s.background = { color: style.bg };
-    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 5.63, fill: { color: style.accent } });
 
     const slideTitle = content?.title || content?.headline || content?.name || '';
     const slideSubtitle = content?.subtitle || content?.subheadline || content?.description || '';
@@ -232,7 +231,6 @@ async function exportToPdf(deck, slides, filename) {
       const slideSubtitle = content?.subtitle || content?.subheadline || content?.description || '';
 
       doc.rect(0, 0, 1280, 720).fill(`#${style.bg}`);
-      doc.rect(0, 0, 12, 720).fill(`#${style.accent}`);
 
       if (slideTitle) {
         doc.font('Helvetica-Bold').fontSize(slide.slide_type === 'title' ? 38 : 26)
