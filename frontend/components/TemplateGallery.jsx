@@ -88,7 +88,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
           {/* Search bar */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-card)',
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '10px 16px', flex: 1, minWidth: 280,
+            borderRadius: 'var(--radius-lg)', padding: '10px 16px', flex: 1, minWidth: 280,
           }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-subtle)' }}>
               <circle cx="11" cy="11" r="8" />
@@ -117,11 +117,11 @@ export default function TemplateGallery({ onSelectTemplate }) {
               style={{
                 background: selectedCategory === cat ? 'var(--brand)' : 'var(--bg-card)',
                 color: selectedCategory === cat ? '#ffffff' : 'var(--text-muted)',
-                border: '1px solid var(--border-subtle)',
+                border: 'none',
                 borderRadius: 'var(--radius-pill)',
                 padding: '6px 16px',
                 fontSize: 12,
-                fontWeight: 600,
+                fontWeight: 400,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.15s ease',
@@ -162,7 +162,6 @@ export default function TemplateGallery({ onSelectTemplate }) {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                borderBottom: '1px solid var(--border-subtle)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{
@@ -174,7 +173,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '0.04em',
-                    border: '1px solid var(--border-subtle)',
+                    border: 'none',
                   }}>
                     {t.category}
                   </span>
@@ -188,6 +187,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
                       fontWeight: 600,
                       textTransform: 'uppercase',
                       letterSpacing: '0.04em',
+                      border: 'none',
                     }}>
                       {t.badge}
                     </span>
@@ -216,12 +216,12 @@ export default function TemplateGallery({ onSelectTemplate }) {
                     {t.tags.map(tag => (
                       <span key={tag} style={{
                         background: 'var(--bg-sidebar)',
-                        border: '1px solid var(--border-subtle)',
                         color: 'var(--text-subtle)',
                         borderRadius: 'var(--radius-pill)',
                         padding: '2px 10px',
                         fontSize: 11,
-                        fontWeight: 500,
+                        fontWeight: 400,
+                        border: 'none',
                       }}>
                         #{tag}
                       </span>
@@ -234,7 +234,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
                   <button
                     className="btn-secondary"
                     onClick={() => handleOpenPreview(t.id)}
-                    style={{ fontSize: 12, padding: '8px 14px', justifyContent: 'center', borderRadius: 'var(--radius-pill)' }}
+                    style={{ fontSize: 12, padding: '8px 14px', justifyContent: 'center', borderRadius: 'var(--radius-pill)', fontWeight: 400 }}
                   >
                     Preview Deck
                   </button>
@@ -243,7 +243,7 @@ export default function TemplateGallery({ onSelectTemplate }) {
                     className="btn-primary"
                     onClick={() => handleUseTemplate(t.id)}
                     disabled={isCreating}
-                    style={{ fontSize: 12, padding: '8px 14px', justifyContent: 'center', fontWeight: 600, borderRadius: 'var(--radius-pill)' }}
+                    style={{ fontSize: 12, padding: '8px 14px', justifyContent: 'center', borderRadius: 'var(--radius-pill)', fontWeight: 400 }}
                   >
                     {isCreating ? 'Creating...' : 'Use Template'}
                   </button>

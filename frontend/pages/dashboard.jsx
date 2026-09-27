@@ -1,4 +1,4 @@
-// pages/dashboard.jsx - Linear Obsidian Decks Directory
+// pages/dashboard.jsx - Pitch Deck Generator Directory
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link href="/?tab=templates" style={{ textDecoration: 'none' }}>
-              <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)' }}>
+              <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="12 2 2 7 12 12 22 7 12 2" />
                   <polyline points="2 17 12 22 22 17" />
@@ -80,7 +80,7 @@ export default function Dashboard() {
             </Link>
 
             <Link href="/?tab=ai" style={{ textDecoration: 'none' }}>
-              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)' }}>
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
@@ -96,7 +96,7 @@ export default function Dashboard() {
           display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28,
         }}>
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -106,7 +106,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -116,7 +116,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -126,7 +126,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -139,7 +139,7 @@ export default function Dashboard() {
         {/* Search & Filter Bar */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          background: 'var(--bg-card)',
           borderRadius: 'var(--radius-lg)', padding: '12px 18px', marginBottom: 28, gap: 16, flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 260 }}>
@@ -164,11 +164,11 @@ export default function Dashboard() {
                 onClick={() => setFilterStatus(st)}
                 style={{
                   background: filterStatus === st ? 'var(--brand)' : 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-subtle)',
+                  border: 'none',
                   borderRadius: 'var(--radius-pill)',
                   color: filterStatus === st ? '#ffffff' : 'var(--text-muted)',
                   fontSize: 11,
-                  fontWeight: 600,
+                  fontWeight: 400,
                   padding: '4px 12px',
                   cursor: 'pointer',
                   textTransform: 'uppercase',
@@ -186,7 +186,7 @@ export default function Dashboard() {
         {filteredDecks.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '64px 20px',
-            background: 'var(--bg-card)', border: '1px dashed var(--border)',
+            background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)',
           }}>
             <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text)', fontWeight: 700 }}>No pitch decks found</h3>
@@ -194,7 +194,7 @@ export default function Dashboard() {
               {search || filterStatus !== 'all' ? 'Try adjusting your search query or status filter' : 'Create your first presentation deck using AI or a template'}
             </p>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <button className="btn-primary" style={{ borderRadius: 'var(--radius-pill)' }}>Create New Deck</button>
+              <button className="btn-primary" style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>Create New Deck</button>
             </Link>
           </div>
         ) : (
@@ -227,7 +227,6 @@ export default function Dashboard() {
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     padding: 16,
-                    borderBottom: '1px solid var(--border-subtle)',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{
@@ -237,7 +236,6 @@ export default function Dashboard() {
                         borderRadius: 'var(--radius-pill)',
                         background: 'var(--bg-card)',
                         color: 'var(--text-muted)',
-                        border: '1px solid var(--border-subtle)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.04em',
                       }}>
@@ -264,7 +262,7 @@ export default function Dashboard() {
                   <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-                        <span style={{ fontWeight: 500 }}>{deck.slide_count || deck.num_slides || 15} slides</span>
+                        <span style={{ fontWeight: 400 }}>{deck.slide_count || deck.num_slides || 15} slides</span>
                         <span style={{ opacity: 0.4 }}>•</span>
                         <span>{deck.owner_name || 'Studio Owner'}</span>
                       </div>
@@ -279,7 +277,6 @@ export default function Dashboard() {
                       justifyContent: 'space-between',
                       marginTop: 16,
                       paddingTop: 12,
-                      borderTop: '1px solid var(--border-subtle)',
                     }}>
                       <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <span>Open Canvas</span>
@@ -292,11 +289,10 @@ export default function Dashboard() {
                         title="Delete Deck"
                         style={{
                           background: 'transparent',
-                          border: '1px solid var(--border-subtle)',
                           color: '#f87171',
                           cursor: 'pointer',
                           fontSize: 11,
-                          fontWeight: 600,
+                          fontWeight: 400,
                           padding: '3px 10px',
                           borderRadius: 'var(--radius-pill)',
                           transition: 'all 0.15s ease',

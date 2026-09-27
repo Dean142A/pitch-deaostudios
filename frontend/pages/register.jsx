@@ -1,4 +1,4 @@
-// pages/register.jsx - Linear-styled Account Registration Page
+// pages/register.jsx - Pitch Deck Generator Registration Page
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -7,6 +7,8 @@ import api from '../utils/api';
 export default function Register() {
   const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +57,6 @@ export default function Register() {
             height: 44,
             borderRadius: '12px',
             background: 'var(--bg-tertiary)',
-            border: '1px solid var(--border-subtle)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -77,7 +78,7 @@ export default function Register() {
             Create your account
           </h1>
           <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 14 }}>
-            Get started with DEAO Pitch Studio today
+            Get started with Pitch Deck Generator
           </p>
         </div>
 
@@ -101,7 +102,7 @@ export default function Register() {
               <input
                 className="input"
                 type="email"
-                placeholder="alex@company.com"
+                placeholder="alex@pitchdeck.com"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 required
@@ -110,32 +111,97 @@ export default function Register() {
 
             <div style={{ marginBottom: 18 }}>
               <label>Password</label>
-              <input
-                className="input"
-                type="password"
-                placeholder="At least 8 characters"
-                value={form.password}
-                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="input"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="At least 8 characters"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  style={{ paddingRight: 40 }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div style={{ marginBottom: 24 }}>
               <label>Confirm Password</label>
-              <input
-                className="input"
-                type="password"
-                placeholder="Repeat password"
-                value={form.confirmPassword}
-                onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="input"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Repeat password"
+                  value={form.confirmPassword}
+                  onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                  style={{ paddingRight: 40 }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {showConfirmPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
               <div style={{
                 background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
                 color: '#f87171',
                 borderRadius: 'var(--radius-md)',
                 padding: '10px 14px',
@@ -156,7 +222,7 @@ export default function Register() {
                 justifyContent: 'center',
                 padding: '11px',
                 fontSize: 14,
-                borderRadius: 'var(--radius-pill)',
+                fontWeight: 400,
               }}
             >
               {loading ? 'Creating account...' : 'Create Account'}
@@ -172,14 +238,14 @@ export default function Register() {
             color: 'var(--text-muted)',
           }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link href="/login" style={{ color: 'var(--brand)', textDecoration: 'none' }}>
               Sign in
             </Link>
           </div>
         </div>
 
         <p style={{ textAlign: 'center', color: 'var(--text-subtle)', fontSize: 12, marginTop: 24 }}>
-          DEAO Studios Pitch Workspace Platform
+          Pitch Deck Generator Workspace
         </p>
       </div>
     </div>

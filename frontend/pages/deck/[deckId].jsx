@@ -588,12 +588,12 @@ export default function DeckEditor() {
               className="btn-secondary"
               onClick={() => setShowInspector(!showInspector)}
               style={{
-                fontSize: 12, padding: '5px 12px', fontWeight: 700,
+                fontSize: 12, padding: '5px 12px', fontWeight: 400,
                 background: showInspector ? 'var(--accent)' : 'transparent',
                 color: showInspector ? '#ffffff' : 'var(--text)',
               }}
             >
-              Figma Inspector Panel {showInspector ? '[ON]' : '[OFF]'}
+              Inspector Panel {showInspector ? '[ON]' : '[OFF]'}
             </button>
 
             {/* Background Picker */}
@@ -1129,7 +1129,7 @@ export default function DeckEditor() {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     fontSize: 11, opacity: 0.6, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)',
                   }}>
-                    <span>Deao Studios Deck Editor</span>
+                    <span>Pitch Deck Generator</span>
                     <span>Slide {selectedSlide + 1} of {slides.length}</span>
                   </div>
                 </div>

@@ -40,13 +40,13 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
     }}>
       <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        background: 'var(--bg-card)',
         borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 1040, maxHeight: '92vh',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
         {/* Modal Top Header */}
         <div style={{
-          padding: '16px 24px', background: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-subtle)',
+          padding: '16px 24px', background: 'var(--bg-sidebar)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -78,8 +78,8 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
           <button
             onClick={onClose}
             style={{
-              background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)',
-              fontSize: 14, cursor: 'pointer', padding: '4px 10px', borderRadius: 'var(--radius-pill)', transition: 'all 0.15s ease',
+              background: 'transparent', color: 'var(--text-muted)',
+              fontSize: 14, cursor: 'pointer', padding: '4px 10px', borderRadius: 'var(--radius-pill)', transition: 'all 0.15s ease', fontWeight: 400,
             }}
           >
             Close
@@ -90,10 +90,10 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
         <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           {/* Left Thumbnail List */}
           <div style={{
-            background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-subtle)',
+            background: 'var(--bg-sidebar)',
             padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-subtle)', letterSpacing: '0.05em', marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-subtle)', letterSpacing: '0.05em', marginBottom: 4 }}>
               Slide Directory ({slides.length})
             </div>
             {slides.map((s, idx) => {
@@ -105,20 +105,19 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                   style={{
                     padding: '10px 12px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
                     background: active ? 'var(--brand)' : 'transparent',
-                    border: active ? 'none' : '1px solid transparent',
                     display: 'flex', alignItems: 'center', gap: 10,
                     transition: 'all 0.15s ease',
                   }}
                 >
                   <span style={{
-                    fontSize: 11, fontWeight: 700, color: active ? '#ffffff' : 'var(--text-subtle)',
+                    fontSize: 11, fontWeight: 400, color: active ? '#ffffff' : 'var(--text-subtle)',
                     width: 18, textAlign: 'center',
                   }}>
                     {idx + 1}
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{
-                      fontSize: 12, fontWeight: active ? 600 : 500,
+                      fontSize: 12, fontWeight: active ? 600 : 400,
                       color: active ? '#ffffff' : 'var(--text)',
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
@@ -139,7 +138,6 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
             <div style={{
               flex: 1, minHeight: 380, borderRadius: 'var(--radius-lg)', padding: 32,
               background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
               color: 'var(--text)', transition: 'all 0.3s ease',
             }}>
@@ -147,8 +145,8 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                 {/* Slide Type Tag */}
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  background: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-pill)', padding: '3px 12px', fontSize: 10, fontWeight: 600,
+                  background: 'var(--bg-tertiary)',
+                  borderRadius: 'var(--radius-pill)', padding: '3px 12px', fontSize: 10, fontWeight: 400,
                   letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 18,
                   color: 'var(--text-muted)',
                 }}>
@@ -189,11 +187,11 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, margin: '16px 0' }}>
                     {currentSlide.content.members.map((m, mIdx) => (
                       <div key={mIdx} style={{
-                        background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                        background: 'var(--bg-sidebar)',
                         borderRadius: 'var(--radius-md)', padding: 12,
                       }}>
                         <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{m.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase' }}>{m.role}</div>
+                        <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 400, marginBottom: 4, textTransform: 'uppercase' }}>{m.role}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{m.bio}</div>
                       </div>
                     ))}
@@ -203,7 +201,7 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                 {/* Chart Visualization */}
                 {currentSlide.chart_data && (
                   <div style={{
-                    background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-sidebar)',
                     borderRadius: 'var(--radius-md)', padding: 16, marginTop: 16, height: 200,
                   }}>
                     <ChartComponent chartData={currentSlide.chart_data} />
@@ -215,8 +213,8 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
               {currentSlide.content?.callout && (
                 <div style={{
                   marginTop: 20, background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)',
-                  padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--text)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '10px 14px', fontSize: 12, fontWeight: 400, color: 'var(--text)',
                 }}>
                   Key Takeaway: {currentSlide.content.callout}
                 </div>
@@ -229,18 +227,18 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                 className="btn-secondary"
                 disabled={activeSlideIndex === 0}
                 onClick={() => setActiveSlideIndex(i => Math.max(0, i - 1))}
-                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}
+                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontWeight: 400 }}
               >
                 Previous Slide
               </button>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
                 Slide {activeSlideIndex + 1} of {slides.length}
               </span>
               <button
                 className="btn-secondary"
                 disabled={activeSlideIndex === slides.length - 1}
                 onClick={() => setActiveSlideIndex(i => Math.min(slides.length - 1, i + 1))}
-                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}
+                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontWeight: 400 }}
               >
                 Next Slide
               </button>
@@ -250,7 +248,7 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
 
         {/* Modal Bottom Footer */}
         <div style={{
-          padding: '16px 24px', background: 'var(--bg-sidebar)', borderTop: '1px solid var(--border-subtle)',
+          padding: '16px 24px', background: 'var(--bg-sidebar)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, gap: 16,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, maxWidth: 440 }}>
@@ -268,7 +266,7 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                 onClick={() => setIsCustomizing(true)}
                 style={{
                   background: 'transparent', border: 'none',
-                  color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: 0, textDecoration: 'underline',
+                  color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: 0, textDecoration: 'underline', fontWeight: 400,
                 }}
               >
                 Personalize Company Name
@@ -277,14 +275,14 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button className="btn-secondary" onClick={onClose} disabled={using} style={{ borderRadius: 'var(--radius-pill)' }}>
+            <button className="btn-secondary" onClick={onClose} disabled={using} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
               Cancel
             </button>
             <button
               className="btn-primary"
               onClick={handleConfirmUse}
               disabled={using}
-              style={{ padding: '8px 20px', fontWeight: 600, borderRadius: 'var(--radius-pill)' }}
+              style={{ padding: '8px 20px', fontWeight: 400, borderRadius: 'var(--radius-pill)' }}
             >
               {using ? 'Creating Deck...' : 'Use Template & Edit Now'}
             </button>

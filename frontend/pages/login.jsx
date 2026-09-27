@@ -1,4 +1,4 @@
-// pages/login.jsx - Linear Obsidian Styled Authentication Page
+// pages/login.jsx - Pitch Deck Generator Authentication Page
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import api from '../utils/api';
 export default function Login() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,24 +22,6 @@ export default function Login() {
       router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to sign in');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleDemoLogin() {
-    setError('');
-    setLoading(true);
-    try {
-      const demoEmail = 'admin@deaostudios.com';
-      const demoPass = 'deao_admin_pass_2026!';
-      setForm({ email: demoEmail, password: demoPass });
-      const data = await api.login(demoEmail, demoPass);
-      localStorage.setItem('deao_token', data.token);
-      localStorage.setItem('deao_user', JSON.stringify(data.user));
-      router.push('/dashboard');
-    } catch (err) {
-      setError(`Demo login failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -62,7 +45,6 @@ export default function Login() {
             height: 44,
             borderRadius: '12px',
             background: 'var(--bg-tertiary)',
-            border: '1px solid var(--border-subtle)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -81,46 +63,11 @@ export default function Login() {
             color: 'var(--text)',
             letterSpacing: '-0.02em',
           }}>
-            Sign in to DEAO Studio
+            Pitch Deck Generator
           </h1>
           <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 14 }}>
-            Enter your credentials to access your workspace
+            Sign in to access your pitch workspace
           </p>
-        </div>
-
-        {/* 1-Click Demo Login Banner */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '14px 18px',
-          marginBottom: 20,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Instant Demo Access
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              Pre-configured Admin credentials
-            </div>
-          </div>
-          <button
-            onClick={handleDemoLogin}
-            disabled={loading}
-            className="btn-secondary"
-            style={{
-              fontSize: 12,
-              padding: '6px 14px',
-              borderRadius: 'var(--radius-pill)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Demo Sign In
-          </button>
         </div>
 
         {/* Auth Card */}
@@ -131,7 +78,7 @@ export default function Login() {
               <input
                 className="input"
                 type="email"
-                placeholder="admin@deaostudios.com"
+                placeholder="alex@pitchdeck.com"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 required
@@ -140,20 +87,54 @@ export default function Login() {
 
             <div style={{ marginBottom: 24 }}>
               <label>Password</label>
-              <input
-                className="input"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="input"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  style={{ paddingRight: 40 }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {showPassword ? (
+                    /* Eye Off SVG */
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    /* Eye On SVG */
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
               <div style={{
                 background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
                 color: '#f87171',
                 borderRadius: 'var(--radius-md)',
                 padding: '10px 14px',
@@ -174,7 +155,7 @@ export default function Login() {
                 justifyContent: 'center',
                 padding: '11px',
                 fontSize: 14,
-                borderRadius: 'var(--radius-pill)',
+                fontWeight: 400,
               }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
@@ -190,28 +171,14 @@ export default function Login() {
             color: 'var(--text-muted)',
           }}>
             Don't have an account?{' '}
-            <Link href="/register" style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link href="/register" style={{ color: 'var(--brand)', textDecoration: 'none' }}>
               Create an account
             </Link>
           </div>
         </div>
 
-        {/* Credentials hint */}
-        <div style={{
-          textAlign: 'center',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-md)',
-          padding: '10px 14px',
-          marginTop: 16,
-          fontSize: 12,
-          color: 'var(--text-muted)',
-        }}>
-          Default Admin: <strong style={{ color: 'var(--text)' }}>admin@deaostudios.com</strong> / <strong style={{ color: 'var(--text)' }}>deao_admin_pass_2026!</strong>
-        </div>
-
         <p style={{ textAlign: 'center', color: 'var(--text-subtle)', fontSize: 12, marginTop: 24 }}>
-          DEAO Studios Pitch Workspace Platform
+          Pitch Deck Generator Workspace
         </p>
       </div>
     </div>

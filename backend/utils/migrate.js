@@ -1,9 +1,7 @@
 // utils/migrate.js
-// Run with: node utils/migrate.js
-// SECURITY NOTE: Default admin password removed. Set via ADMIN_PASSWORD env var.
-
 require('dotenv').config();
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -88,33 +86,31 @@ CREATE INDEX IF NOT EXISTS idx_metrics_deck_id ON metrics(deck_id);
 CREATE INDEX IF NOT EXISTS idx_deck_versions_deck_id ON deck_versions(deck_id);
 `;
 
+async function seedDefaultUsers() {
+  const defaultUsers = [
+    { name: 'Admin User', email: 'admin@pitchdeck.com', pass: 'PitchDeck2026!', role: 'admin' },
+    { name: 'Alex Morgan', email: 'alex@pitchdeck.com', pass: 'PitchDeck2026!', role: 'editor' },
+    { name: 'Sarah Chen', email: 'sarah@pitchdeck.com', pass: 'PitchDeck2026!', role: 'editor' },
+  ];
+
+  for (const u of defaultUsers) {
+    const hash = await bcrypt.hash(u.pass, 12);
+    await pool.query(
+      `INSERT INTO users (name, email, password_hash, role) 
+       VALUES ($1, $2, $3, $4) 
+       ON CONFLICT (email) DO UPDATE SET password_hash = $3, name = $1, role = $4`,
+      [u.name, u.email, hash, u.role]
+    );
+    console.log(`👤 Seeded user: ${u.email} (${u.role})`);
+  }
+}
+
 async function migrate() {
   console.log('🔄 Running database migrations...');
   try {
     await pool.query(migrations);
     console.log('✅ Migrations complete!');
-
-    // FIX #44: Default admin password removed — must be set via ADMIN_PASSWORD env var
-    const existing = await pool.query('SELECT id FROM users LIMIT 1');
-    if (existing.rows.length === 0) {
-      const adminPassword = process.env.ADMIN_PASSWORD;
-      if (!adminPassword) {
-        console.error('\n❌ No users exist and ADMIN_PASSWORD env var is not set.');
-        console.error('   Set ADMIN_PASSWORD=<your_secure_password> and rerun migrate.\n');
-        process.exit(1);
-      }
-      if (adminPassword.length < 8) {
-        console.error('\n❌ ADMIN_PASSWORD must be at least 8 characters.\n');
-        process.exit(1);
-      }
-      const bcrypt = require('bcryptjs');
-      const hash = await bcrypt.hash(adminPassword, 12);
-      await pool.query(
-        `INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
-        ['Admin', process.env.ADMIN_EMAIL || 'admin@deaostudios.com', hash, 'admin']
-      );
-      console.log(`👤 Admin created: ${process.env.ADMIN_EMAIL || 'admin@deaostudios.com'}`);
-    }
+    await seedDefaultUsers();
   } catch (err) {
     console.error('❌ Migration failed:', err.message);
     process.exit(1);

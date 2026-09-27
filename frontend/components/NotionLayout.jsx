@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '../utils/api';
 
-export default function NotionLayout({ children, activeTab = 'dashboard', title = 'DEAO Studio' }) {
+export default function NotionLayout({ children, activeTab = 'dashboard', title = 'Pitch Deck Generator' }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState(null);
@@ -88,7 +88,6 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
       <aside style={{
         width: collapsed ? 64 : 240,
         background: 'var(--bg-sidebar)',
-        borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -102,7 +101,6 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-subtle)',
         }}>
           {!collapsed && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -124,10 +122,10 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-                  DEAO STUDIOS
+                  PITCH DECK
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Pitch Studio
+                <div style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Generator
                 </div>
               </div>
             </div>
@@ -177,9 +175,8 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
                     ? 'var(--brand)'
                     : (item.primary ? 'var(--bg-tertiary)' : 'transparent'),
                   color: isActive ? '#ffffff' : (item.primary ? 'var(--text)' : 'var(--text-muted)'),
-                  border: item.primary && !isActive ? '1px solid var(--border)' : '1px solid transparent',
                   fontSize: 13,
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: 400,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}>
@@ -197,7 +194,6 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
         {user && (
           <div style={{
             padding: '12px 14px',
-            borderTop: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -210,13 +206,12 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
                   height: 28,
                   borderRadius: '50%',
                   background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-subtle)',
                   color: 'var(--text)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 12,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   flexShrink: 0,
                 }}>
                   {user.name?.[0]?.toUpperCase() || 'U'}
@@ -236,11 +231,10 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
               title="Sign Out"
               style={{
                 background: 'transparent',
-                border: '1px solid var(--border-subtle)',
                 color: 'var(--text-muted)',
                 cursor: 'pointer',
                 fontSize: 11,
-                fontWeight: 600,
+                fontWeight: 400,
                 padding: '4px 10px',
                 borderRadius: 'var(--radius-pill)',
                 transition: 'all 0.15s ease',
@@ -258,7 +252,6 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
         <header style={{
           height: 56,
           padding: '0 24px',
-          borderBottom: '1px solid var(--border)',
           background: 'var(--bg-card)',
           display: 'flex',
           alignItems: 'center',
@@ -277,11 +270,10 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
               alignItems: 'center',
               gap: 6,
               background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-pill)',
               padding: '3px 10px',
               fontSize: 11,
-              fontWeight: 500,
+              fontWeight: 400,
               color: 'var(--text-muted)',
             }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />

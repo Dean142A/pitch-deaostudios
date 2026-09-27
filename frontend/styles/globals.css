@@ -1,19 +1,19 @@
-/* styles/globals.css - Linear.app Obsidian System (No Gradients, Helvetica Neue, Pill Buttons) */
+/* styles/globals.css - Linear.app Obsidian System (No Borders, Helvetica Neue, Regular Body Weight Buttons) */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Linear Dark Obsidian Palette (Solid, High-Contrast, No Gradients) */
+  /* Linear Dark Obsidian Palette */
   --bg: #0b0d11;
   --bg-sidebar: #12151e;
   --bg-card: #171b26;
   --bg-hover: #202636;
   --bg-elevated: #1e2332;
-  --border: #262b3a;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-highlight: #5e6ad2;
+  --border: transparent;
+  --border-light: transparent;
+  --border-highlight: transparent;
   
   --accent: #5e6ad2;
   --accent-hover: #6e7cd8;
@@ -24,7 +24,7 @@
   --text-subtle: #626775;
 
   --notion-callout: rgba(94, 106, 210, 0.08);
-  --notion-callout-border: rgba(94, 106, 210, 0.3);
+  --notion-callout-border: transparent;
   
   --success: #10b981;
   --warning: #f59e0b;
@@ -55,6 +55,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+button {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 400 !important; /* Regular body weight, not medium or heavy */
+  border: none !important;
+  outline: none;
+}
+
 code, pre {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
@@ -75,21 +82,18 @@ code, pre {
   background: rgba(94, 106, 210, 0.5);
 }
 
-/* Cards & Panels */
+/* Cards & Panels - No Borders */
 .notion-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: none !important;
   border-radius: var(--radius-md);
   padding: 24px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.notion-card:hover {
-  border-color: var(--border-highlight);
+  transition: background-color 0.15s ease;
 }
 
 .notion-callout {
   background: var(--notion-callout);
-  border: 1px solid var(--notion-callout-border);
+  border: none !important;
   border-radius: var(--radius-md);
   padding: 16px 20px;
   display: flex;
@@ -99,25 +103,24 @@ code, pre {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Pill Buttons (Strictly Solid Colors, NO Gradients) */
+/* Pill Buttons - No Borders, Regular Body Weight */
 .btn-primary {
   background: var(--accent);
   color: #ffffff;
-  border: 1px solid var(--accent);
+  border: none !important;
   border-radius: var(--radius-pill);
   padding: 9px 20px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400 !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
 }
 .btn-primary:hover {
   background: var(--accent-hover);
-  border-color: var(--accent-hover);
 }
 .btn-primary:active {
   transform: translateY(1px);
@@ -131,31 +134,30 @@ code, pre {
 .btn-secondary {
   background: var(--bg-card);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: none !important;
   border-radius: var(--radius-pill);
   padding: 9px 20px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400 !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease;
 }
 .btn-secondary:hover {
   background: var(--bg-hover);
-  border-color: var(--text-subtle);
   color: #ffffff;
 }
 .btn-secondary:active {
   transform: translateY(1px);
 }
 
-/* Form Inputs */
+/* Form Inputs - No Borders */
 .input {
   background: var(--bg-sidebar);
-  border: 1px solid var(--border);
+  border: none !important;
   border-radius: 8px;
   color: var(--text);
   padding: 10px 14px;
@@ -163,10 +165,6 @@ code, pre {
   font-size: 13.5px;
   width: 100%;
   outline: none;
-  transition: border-color 0.15s ease;
-}
-.input:focus {
-  border-color: var(--accent);
 }
 .input::placeholder {
   color: var(--text-subtle);
@@ -183,7 +181,7 @@ label {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Pill Badges */
+/* Pill Badges - No Borders */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -195,32 +193,25 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  border: none !important;
 }
-.badge-generating { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-.badge-completed { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-.badge-drafting { background: rgba(94,106,210,0.15); color: #a5b4fc; border: 1px solid rgba(94,106,210,0.3); }
-.badge-failed { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.badge-queued { background: rgba(138,143,157,0.15); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-generating { background: rgba(245,158,11,0.15); color: #fbbf24; border: none !important; }
+.badge-completed { background: rgba(16,185,129,0.15); color: #34d399; border: none !important; }
+.badge-drafting { background: rgba(94,106,210,0.15); color: #a5b4fc; border: none !important; }
+.badge-failed { background: rgba(239,68,68,0.15); color: #f87171; border: none !important; }
+.badge-queued { background: rgba(138,143,157,0.15); color: var(--text-muted); border: none !important; }
 
 /* Slide preview container */
 .slide-thumb {
   aspect-ratio: 16/9;
-  border: 1px solid var(--border);
+  border: none !important;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   position: relative;
   transition: all 0.15s ease;
 }
-.slide-thumb:hover {
-  border-color: var(--accent);
-}
-.slide-thumb.active {
-  border-color: var(--accent);
-}
 
 /* Animations */
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .animate-spin { animation: spin 1s linear infinite; }
-
-

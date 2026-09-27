@@ -70,7 +70,6 @@ export default function Home() {
         {/* Banner Callout Header */}
         <div style={{
           background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
           borderRadius: 'var(--radius-lg)',
           padding: '24px 28px',
           marginBottom: 32,
@@ -86,15 +85,14 @@ export default function Home() {
               padding: '3px 10px',
               borderRadius: 'var(--radius-pill)',
               background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-subtle)',
               color: 'var(--text-muted)',
               fontSize: 11,
-              fontWeight: 600,
+              fontWeight: 400,
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               marginBottom: 10,
             }}>
-              DEAO AI Engine v2.0
+              AI Generator Engine v2.0
             </div>
             <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)' }}>
               Create High-Converting Pitch Decks
@@ -111,7 +109,6 @@ export default function Home() {
           gridTemplateColumns: '1fr 1fr',
           gap: 8,
           background: 'var(--bg-sidebar)',
-          border: '1px solid var(--border)',
           borderRadius: 'var(--radius-pill)',
           padding: 4,
           marginBottom: 36,
@@ -125,7 +122,7 @@ export default function Home() {
               borderRadius: 'var(--radius-pill)',
               padding: '10px 20px',
               fontSize: 13,
-              fontWeight: 600,
+              fontWeight: 400,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -151,7 +148,7 @@ export default function Home() {
               borderRadius: 'var(--radius-pill)',
               padding: '10px 20px',
               fontSize: 13,
-              fontWeight: 600,
+              fontWeight: 400,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -181,7 +178,6 @@ export default function Home() {
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: 12,
               background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
               borderRadius: 'var(--radius-lg)',
               padding: '12px 16px',
               marginBottom: 28,
@@ -205,7 +201,6 @@ export default function Home() {
                       borderRadius: 'var(--radius-md)',
                       cursor: completed ? 'pointer' : 'default',
                       background: active ? 'var(--bg-tertiary)' : 'transparent',
-                      border: active ? '1px solid var(--border-highlight)' : '1px solid transparent',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -214,9 +209,8 @@ export default function Home() {
                       height: 26,
                       borderRadius: '50%',
                       background: completed ? 'var(--brand)' : (active ? 'var(--brand)' : 'var(--bg-sidebar)'),
-                      border: active || completed ? 'none' : '1px solid var(--border)',
                       color: '#ffffff',
-                      fontWeight: 700,
+                      fontWeight: 400,
                       fontSize: 12,
                       display: 'flex',
                       alignItems: 'center',
@@ -230,7 +224,7 @@ export default function Home() {
                       ) : s.stepNum}
                     </div>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--text)' : 'var(--text-subtle)' }}>
+                      <div style={{ fontSize: 13, fontWeight: active ? 600 : 400, color: active ? 'var(--text)' : 'var(--text-subtle)' }}>
                         {s.title}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
@@ -282,7 +276,6 @@ export default function Home() {
                 <div style={{ marginBottom: 28 }}>
                   <label>Company Logo (optional)</label>
                   <div style={{
-                    border: '1px dashed var(--border)',
                     borderRadius: 'var(--radius-md)',
                     padding: '20px',
                     textAlign: 'center',
@@ -297,16 +290,16 @@ export default function Home() {
                       onChange={e => setLogoFile(e.target.files[0])} />
                     <label htmlFor="logo-input" style={{ cursor: 'pointer', color: 'var(--text-muted)', margin: 0 }}>
                       {logoFile ? (
-                        <span style={{ color: 'var(--brand)', fontWeight: 600 }}>Attached: {logoFile.name}</span>
+                        <span style={{ color: 'var(--brand)', fontWeight: 400 }}>Attached: {logoFile.name}</span>
                       ) : (
-                        <span>Drag & drop logo file here or <span style={{ color: 'var(--brand)', fontWeight: 600 }}>browse device</span></span>
+                        <span>Drag & drop logo file here or <span style={{ color: 'var(--brand)', fontWeight: 400 }}>browse device</span></span>
                       )}
                     </label>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1} style={{ borderRadius: 'var(--radius-pill)' }}>
+                  <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                     Next: Market & Goals
                   </button>
                 </div>
@@ -351,15 +344,15 @@ export default function Home() {
                     <input type="range" min="8" max="25" value={form.numSlides}
                       onChange={e => set('numSlides', parseInt(e.target.value))}
                       style={{ flex: 1, accentColor: 'var(--brand)' }} />
-                    <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 15, width: 32, textAlign: 'right' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 15, width: 32, textAlign: 'right' }}>
                       {form.numSlides}
                     </span>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button className="btn-secondary" onClick={() => setStep(1)} style={{ borderRadius: 'var(--radius-pill)' }}>Back</button>
-                  <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2} style={{ borderRadius: 'var(--radius-pill)' }}>
+                  <button className="btn-secondary" onClick={() => setStep(1)} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>Back</button>
+                  <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                     Next: Theme & Background
                   </button>
                 </div>
@@ -382,7 +375,6 @@ export default function Home() {
                         key={s.id}
                         onClick={() => set('style', s.id)}
                         style={{
-                          border: form.style === s.id ? '1px solid var(--brand)' : '1px solid var(--border)',
                           borderRadius: 'var(--radius-md)',
                           padding: '16px 14px',
                           cursor: 'pointer',
@@ -405,7 +397,6 @@ export default function Home() {
                   <div
                     onClick={() => setShowBgPicker(true)}
                     style={{
-                      border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-md)',
                       padding: 16,
                       background: 'var(--bg-card)',
@@ -422,7 +413,6 @@ export default function Home() {
                         height: 36,
                         borderRadius: 'var(--radius-sm)',
                         background: activeBg.previewGradient || 'var(--bg-tertiary)',
-                        border: '1px solid var(--border)',
                       }} />
                       <div>
                         <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>
@@ -433,7 +423,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                    <span className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}>
+                    <span className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                       Change Background
                     </span>
                   </div>
@@ -442,12 +432,11 @@ export default function Home() {
                 {/* Summary Card */}
                 <div style={{
                   background: 'var(--bg-sidebar)',
-                  border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   padding: '16px 20px',
                   marginBottom: 28,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
                     Deck Generation Summary
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12 }}>
@@ -461,7 +450,6 @@ export default function Home() {
                 {error && (
                   <div style={{
                     background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.25)',
                     color: '#f87171',
                     borderRadius: 'var(--radius-md)',
                     padding: '12px 16px',
@@ -473,8 +461,8 @@ export default function Home() {
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button className="btn-secondary" onClick={() => setStep(2)} disabled={loading} style={{ borderRadius: 'var(--radius-pill)' }}>Back</button>
-                  <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ padding: '10px 24px', fontSize: 14, borderRadius: 'var(--radius-pill)' }}>
+                  <button className="btn-secondary" onClick={() => setStep(2)} disabled={loading} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>Back</button>
+                  <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ padding: '10px 24px', fontSize: 14, borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                     {loading ? 'Generating Pitch Deck...' : 'Generate Pitch Deck'}
                   </button>
                 </div>

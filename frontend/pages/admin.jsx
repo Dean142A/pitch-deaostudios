@@ -1,4 +1,4 @@
-// pages/admin.jsx - Linear Obsidian Admin Settings
+// pages/admin.jsx - Pitch Deck Generator Admin Settings
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import NotionLayout from '../components/NotionLayout';
@@ -17,6 +17,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'editor' });
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [userMsg, setUserMsg] = useState('');
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function Admin() {
         {/* Navigation Tabs */}
         <div style={{
           display: 'inline-flex', gap: 6,
-          background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
+          background: 'var(--bg-sidebar)',
           borderRadius: 'var(--radius-pill)', padding: 4, marginBottom: 28,
         }}>
           {[
@@ -105,7 +106,7 @@ export default function Admin() {
                 borderRadius: 'var(--radius-pill)',
                 padding: '8px 18px',
                 fontSize: 13,
-                fontWeight: 600,
+                fontWeight: 400,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
@@ -121,10 +122,10 @@ export default function Admin() {
 
             {aiStatus && (
               <div style={{
-                background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                background: 'var(--bg-sidebar)',
                 borderRadius: 'var(--radius-md)', padding: 18, marginBottom: 24,
               }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
                   Live LLM Status
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, fontSize: 13 }}>
@@ -178,7 +179,6 @@ export default function Admin() {
             {testResult && (
               <div style={{
                 background: testResult.ok === true ? 'rgba(16,185,129,0.1)' : testResult.ok === false ? 'rgba(239,68,68,0.1)' : 'var(--bg-sidebar)',
-                border: `1px solid ${testResult.ok === true ? 'rgba(16,185,129,0.25)' : testResult.ok === false ? 'rgba(239,68,68,0.25)' : 'var(--border)'}`,
                 color: testResult.ok === true ? '#34d399' : testResult.ok === false ? '#f87171' : 'var(--text)',
                 borderRadius: 'var(--radius-md)', padding: '12px 16px', fontSize: 13, marginBottom: 24,
               }}>
@@ -187,8 +187,8 @@ export default function Admin() {
             )}
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn-secondary" onClick={testAI} style={{ borderRadius: 'var(--radius-pill)' }}>Test Connection</button>
-              <button className="btn-primary" onClick={saveAIKeys} disabled={saving} style={{ borderRadius: 'var(--radius-pill)' }}>
+              <button className="btn-secondary" onClick={testAI} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>Test Connection</button>
+              <button className="btn-primary" onClick={saveAIKeys} disabled={saving} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                 {saving ? 'Saving...' : 'Save AI Credentials'}
               </button>
             </div>
@@ -203,17 +203,56 @@ export default function Admin() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div>
                   <label>Full Name</label>
-                  <input className="input" placeholder="Jane Doe" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} />
+                  <input className="input" placeholder="Alex Morgan" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} />
                 </div>
                 <div>
                   <label>Email Address</label>
-                  <input className="input" placeholder="jane@deaostudios.com" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} />
+                  <input className="input" placeholder="alex@pitchdeck.com" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
                 <div>
                   <label>Password</label>
-                  <input type="password" className="input" placeholder="••••••••" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNewUserPassword ? 'text' : 'password'}
+                      className="input"
+                      placeholder="••••••••"
+                      value={newUser.password}
+                      onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                      style={{ paddingRight: 40 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewUserPassword(!showNewUserPassword)}
+                      title={showNewUserPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: 12,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        color: 'var(--text-muted)',
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {showNewUserPassword ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label>Role</label>
@@ -230,7 +269,7 @@ export default function Admin() {
                 </div>
               )}
 
-              <button className="btn-primary" onClick={createUser} style={{ borderRadius: 'var(--radius-pill)' }}>Create User Account</button>
+              <button className="btn-primary" onClick={createUser} style={{ borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>Create User Account</button>
             </div>
 
             {/* Users Directory */}
@@ -240,7 +279,7 @@ export default function Admin() {
                 {users.map(u => (
                   <div key={u.id} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '12px 16px', background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                    padding: '12px 16px', background: 'var(--bg-sidebar)',
                     borderRadius: 'var(--radius-md)', fontSize: 13,
                   }}>
                     <div>
