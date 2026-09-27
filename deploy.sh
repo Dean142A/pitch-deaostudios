@@ -140,8 +140,8 @@ EOF_NGINX
 
     echo 'Verifying active HTTP service health...'
     HEALTH_OK=false
-    for i in \$(seq 1 30); do
-        if curl -sf http://127.0.0.1:8090/health > /dev/null 2>&1 || curl -sf http://127.0.0.1:8090 > /dev/null 2>&1; then
+    for i in \$(seq 1 45); do
+        if curl -sf http://127.0.0.1:8090/api/health > /dev/null 2>&1 || curl -sf http://127.0.0.1:8090 > /dev/null 2>&1; then
             HEALTH_OK=true
             break
         fi
