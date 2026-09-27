@@ -75,7 +75,7 @@ app.use(helmet({
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "wss:", "ws:", "https:", "http:"],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],
     },
@@ -84,12 +84,21 @@ app.use(helmet({
 }));
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
-// FIX #4: CORS restricted to explicit whitelist, no fallback to wildcard
-const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(o => o.trim());
+// FIX #4: CORS restricted to explicit whitelist, including pitch.deaostudios.cloud & local dev
+const envOrigins = (process.env.FRONTEND_URL || '').split(',').map(o => o.trim()).filter(Boolean);
+const ALLOWED_ORIGINS = Array.from(new Set([
+  'https://pitch.deaostudios.cloud',
+  'http://pitch.deaostudios.cloud',
+  'http://localhost:3000',
+  'http://localhost:4000',
+  'http://localhost',
+  ...envOrigins,
+]));
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGINS.includes('*')) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -105,19 +114,19 @@ app.use('/uploads', (req, res, next) => {
 }, express.static(path.join(STORAGE, 'uploads')));
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
-// FIX #7: Tiered rate limits — auth endpoints are much stricter
+// Tiered rate limits — auth endpoints increased to 200 per 15 min to prevent lockouts
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 100,
+  windowMs: 15 * 60 * 1000, max: 300,
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true, legacyHeaders: false,
 });
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, max: 10,
+  windowMs: 15 * 60 * 1000, max: 200,
   message: { error: 'Too many login attempts. Please try again later.' },
   standardHeaders: true, legacyHeaders: false,
 });
 const aiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, max: 20,
+  windowMs: 60 * 60 * 1000, max: 100,
   message: { error: 'AI rate limit reached. Please try again later.' },
   standardHeaders: true, legacyHeaders: false,
 });
