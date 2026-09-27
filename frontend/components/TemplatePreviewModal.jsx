@@ -1,4 +1,4 @@
-// frontend/components/TemplatePreviewModal.jsx - Create UI Interactive Preview Modal
+// frontend/components/TemplatePreviewModal.jsx - Linear Obsidian Interactive Preview Modal
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { getBackgroundPreset } from '../utils/backgrounds';
@@ -40,33 +40,36 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
     }}>
       <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border-highlight)',
-        borderRadius: 20, width: '100%', maxWidth: 1040, maxHeight: '92vh',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 30px 60px -15px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.25)',
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 1040, maxHeight: '92vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
         {/* Modal Top Header */}
         <div style={{
-          padding: '18px 28px', background: 'rgba(14, 17, 26, 0.95)', borderBottom: '1px solid var(--border)',
+          padding: '16px 24px', background: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-subtle)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+              width: 32, height: 32, borderRadius: '8px',
+              background: 'var(--brand)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontWeight: 900, fontSize: 16,
-              boxShadow: '0 0 16px rgba(99,102,241,0.4)',
+              color: '#ffffff',
             }}>
-              ✦
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 19, fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.01em' }}>
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
                 {template.name}
               </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 2 }}>
                 <span className="badge badge-completed">{template.category}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {template.numSlides} Slides • Theme: <strong style={{ color: '#06b6d4' }}>{template.style}</strong>
+                  {template.numSlides} Slides • Theme: <strong>{template.style}</strong>
                 </span>
               </div>
             </div>
@@ -75,23 +78,23 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'var(--text-muted)',
-              fontSize: 16, cursor: 'pointer', padding: '6px 12px', borderRadius: 8, transition: 'all 0.15s ease',
+              background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)',
+              fontSize: 14, cursor: 'pointer', padding: '4px 10px', borderRadius: 'var(--radius-pill)', transition: 'all 0.15s ease',
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
         {/* Modal Main Content Area */}
-        <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           {/* Left Thumbnail List */}
           <div style={{
-            background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border)',
-            padding: 18, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10,
+            background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-subtle)',
+            padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-subtle)', letterSpacing: '0.08em', marginBottom: 4 }}>
-              SLIDE DIRECTORY ({slides.length})
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-subtle)', letterSpacing: '0.05em', marginBottom: 4 }}>
+              Slide Directory ({slides.length})
             </div>
             {slides.map((s, idx) => {
               const active = idx === activeSlideIndex;
@@ -100,29 +103,26 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                   key={idx}
                   onClick={() => setActiveSlideIndex(idx)}
                   style={{
-                    padding: '12px 14px', borderRadius: 10, cursor: 'pointer',
-                    background: active ? 'var(--bg-hover)' : 'transparent',
-                    border: active ? '1px solid var(--accent)' : '1px solid transparent',
-                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '10px 12px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                    background: active ? 'var(--brand)' : 'transparent',
+                    border: active ? 'none' : '1px solid transparent',
+                    display: 'flex', alignItems: 'center', gap: 10,
                     transition: 'all 0.15s ease',
                   }}
                 >
                   <span style={{
-                    fontSize: 11, fontWeight: 800, color: active ? '#06b6d4' : 'var(--text-subtle)',
-                    width: 20, textAlign: 'center',
+                    fontSize: 11, fontWeight: 700, color: active ? '#ffffff' : 'var(--text-subtle)',
+                    width: 18, textAlign: 'center',
                   }}>
                     {idx + 1}
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{
-                      fontSize: 12, fontWeight: active ? 700 : 500,
+                      fontSize: 12, fontWeight: active ? 600 : 500,
                       color: active ? '#ffffff' : 'var(--text)',
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                     }}>
                       {s.content?.title || s.slide_type.replace('_', ' ')}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>
-                      {s.slide_type.replace('_', ' ')}
                     </div>
                   </div>
                 </div>
@@ -132,44 +132,41 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
 
           {/* Right Live Slide Canvas Preview */}
           <div style={{
-            padding: 28, display: 'flex', flexDirection: 'column',
+            padding: 24, display: 'flex', flexDirection: 'column',
             overflowY: 'auto', background: 'var(--bg)', position: 'relative',
           }}>
             {/* Live Canvas Box */}
             <div style={{
-              flex: 1, minHeight: 400, borderRadius: 14, padding: 36,
-              background: bgPreset.style.background,
-              backgroundImage: bgPreset.style.backgroundImage,
-              backgroundSize: bgPreset.style.backgroundSize || 'cover',
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.6)',
+              flex: 1, minHeight: 380, borderRadius: 'var(--radius-lg)', padding: 32,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-              color: '#f8fafc', transition: 'all 0.3s ease',
+              color: 'var(--text)', transition: 'all 0.3s ease',
             }}>
               <div>
                 {/* Slide Type Tag */}
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 20, padding: '4px 14px', fontSize: 10, fontWeight: 800,
-                  letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 20,
-                  backdropFilter: 'blur(6px)', color: '#ffffff',
+                  background: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-pill)', padding: '3px 12px', fontSize: 10, fontWeight: 600,
+                  letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 18,
+                  color: 'var(--text-muted)',
                 }}>
-                  <span>SLIDE {activeSlideIndex + 1}</span>
-                  <span>•</span>
+                  <span>Slide {activeSlideIndex + 1}</span>
+                  <span style={{ opacity: 0.4 }}>•</span>
                   <span>{currentSlide.slide_type.replace('_', ' ')}</span>
                 </div>
 
                 {/* Title & Subtitle */}
                 <h2 style={{
-                  margin: '0 0 12px', fontSize: 28, fontWeight: 900,
-                  lineHeight: 1.2, letterSpacing: '-0.02em', color: '#ffffff',
+                  margin: '0 0 10px', fontSize: 24, fontWeight: 700,
+                  lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text)',
                 }}>
                   {currentSlide.content?.title}
                 </h2>
                 {currentSlide.content?.subtitle && (
                   <p style={{
-                    margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.85)',
+                    margin: '0 0 20px', fontSize: 14, color: 'var(--text-muted)',
                     maxWidth: '90%', lineHeight: 1.5,
                   }}>
                     {currentSlide.content.subtitle}
@@ -178,9 +175,9 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
 
                 {/* Bullets List */}
                 {currentSlide.content?.bullets && (
-                  <ul style={{ margin: '0 0 20px', paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <ul style={{ margin: '0 0 20px', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {currentSlide.content.bullets.map((b, bIdx) => (
-                      <li key={bIdx} style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.9)', lineHeight: 1.5 }}>
+                      <li key={bIdx} style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
                         {b}
                       </li>
                     ))}
@@ -189,15 +186,15 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
 
                 {/* Team Members Grid */}
                 {currentSlide.content?.members && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, margin: '20px 0' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, margin: '16px 0' }}>
                     {currentSlide.content.members.map((m, mIdx) => (
                       <div key={mIdx} style={{
-                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)',
-                        borderRadius: 10, padding: 14,
+                        background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)', padding: 12,
                       }}>
-                        <div style={{ fontWeight: 800, fontSize: 14, color: '#fff' }}>{m.name}</div>
-                        <div style={{ fontSize: 11, color: '#38bdf8', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>{m.role}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)' }}>{m.bio}</div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{m.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase' }}>{m.role}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{m.bio}</div>
                       </div>
                     ))}
                   </div>
@@ -206,8 +203,8 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
                 {/* Chart Visualization */}
                 {currentSlide.chart_data && (
                   <div style={{
-                    background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 12, padding: 18, marginTop: 20, height: 210,
+                    background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)', padding: 16, marginTop: 16, height: 200,
                   }}>
                     <ChartComponent chartData={currentSlide.chart_data} />
                   </div>
@@ -217,35 +214,35 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
               {/* Callout Box at Bottom of Slide */}
               {currentSlide.content?.callout && (
                 <div style={{
-                  marginTop: 24, background: 'rgba(14, 165, 233, 0.15)',
-                  border: '1px solid rgba(14, 165, 233, 0.4)', borderRadius: 10,
-                  padding: '12px 16px', fontSize: 12, fontWeight: 700, color: '#38bdf8',
+                  marginTop: 20, background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)',
+                  padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--text)',
                 }}>
-                  KEY TAKEAWAY: {currentSlide.content.callout}
+                  Key Takeaway: {currentSlide.content.callout}
                 </div>
               )}
             </div>
 
             {/* Slide Carousel Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
               <button
                 className="btn-secondary"
                 disabled={activeSlideIndex === 0}
                 onClick={() => setActiveSlideIndex(i => Math.max(0, i - 1))}
-                style={{ fontSize: 12, padding: '7px 16px' }}
+                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}
               >
-                ← Previous Slide
+                Previous Slide
               </button>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
                 Slide {activeSlideIndex + 1} of {slides.length}
               </span>
               <button
                 className="btn-secondary"
                 disabled={activeSlideIndex === slides.length - 1}
                 onClick={() => setActiveSlideIndex(i => Math.min(slides.length - 1, i + 1))}
-                style={{ fontSize: 12, padding: '7px 16px' }}
+                style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}
               >
-                Next Slide →
+                Next Slide
               </button>
             </div>
           </div>
@@ -253,14 +250,14 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
 
         {/* Modal Bottom Footer */}
         <div style={{
-          padding: '18px 28px', background: 'rgba(14, 17, 26, 0.95)', borderTop: '1px solid var(--border)',
+          padding: '16px 24px', background: 'var(--bg-sidebar)', borderTop: '1px solid var(--border-subtle)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, gap: 16,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, maxWidth: 460 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, maxWidth: 440 }}>
             {isCustomizing ? (
               <input
                 className="input"
-                placeholder="Enter company name (e.g. Acme Artificial Intelligence)..."
+                placeholder="Enter company name..."
                 value={companyNameInput}
                 onChange={e => setCompanyNameInput(e.target.value)}
                 style={{ fontSize: 13 }}
@@ -270,8 +267,8 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
               <button
                 onClick={() => setIsCustomizing(true)}
                 style={{
-                  background: 'transparent', border: '1px border var(--border)',
-                  color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: '4px 8px',
+                  background: 'transparent', border: 'none',
+                  color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: 0, textDecoration: 'underline',
                 }}
               >
                 Personalize Company Name
@@ -279,17 +276,17 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button className="btn-secondary" onClick={onClose} disabled={using}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button className="btn-secondary" onClick={onClose} disabled={using} style={{ borderRadius: 'var(--radius-pill)' }}>
               Cancel
             </button>
             <button
               className="btn-primary"
               onClick={handleConfirmUse}
               disabled={using}
-              style={{ padding: '10px 22px', fontWeight: 700 }}
+              style={{ padding: '8px 20px', fontWeight: 600, borderRadius: 'var(--radius-pill)' }}
             >
-              {using ? 'Creating Deck...' : 'Use Template & Edit Now →'}
+              {using ? 'Creating Deck...' : 'Use Template & Edit Now'}
             </button>
           </div>
         </div>
@@ -297,4 +294,3 @@ export default function TemplatePreviewModal({ template, onClose, onUseTemplate 
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-// pages/index.jsx - Create UI Pitch Deck Creator Wizard
+// pages/index.jsx - Linear Obsidian Styled Pitch Deck Creator
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import NotionLayout from '../components/NotionLayout';
@@ -8,9 +8,9 @@ import { getBackgroundPreset } from '../utils/backgrounds';
 import api from '../utils/api';
 
 const STYLES = [
-  { id: 'modern-tech', label: 'Modern Tech Studio', desc: 'Dark obsidian, neon violet & cyan highlights', color: '#6366f1' },
-  { id: 'corporate', label: 'Corporate Executive', desc: 'Clean high-contrast slate, deep royal blue', color: '#06b6d4' },
-  { id: 'creative', label: 'Creative Showcase', desc: 'Vibrant gradients, bold typography & rose accents', color: '#f43f5e' },
+  { id: 'modern-tech', label: 'Modern Tech', desc: 'Dark obsidian slate with indigo highlights', color: '#5e6ad2' },
+  { id: 'corporate', label: 'Corporate Executive', desc: 'Clean high-contrast dark steel theme', color: '#38bdf8' },
+  { id: 'creative', label: 'Creative Studio', desc: 'Bold typography with rose accents', color: '#f43f5e' },
 ];
 
 export default function Home() {
@@ -67,47 +67,74 @@ export default function Home() {
     <NotionLayout activeTab={creationMode === 'templates' ? 'templates' : 'new'} title="Create Pitch Deck">
       <div style={{ maxWidth: creationMode === 'templates' ? 1160 : 820, margin: '0 auto', padding: '40px 24px', transition: 'max-width 0.3s ease' }}>
         
-        {/* Hero Banner Banner Callout */}
+        {/* Banner Callout Header */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)',
-          border: '1px solid rgba(99, 102, 241, 0.3)',
-          borderRadius: 16, padding: '24px 28px', marginBottom: 32,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          backdropFilter: 'blur(12px)', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '24px 28px',
+          marginBottom: 32,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 20, background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.4)', color: '#a5b4fc', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-              <span>✦</span> DEAO AI ENGINE v2.0
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '3px 10px',
+              borderRadius: 'var(--radius-pill)',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-muted)',
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: 10,
+            }}>
+              DEAO AI Engine v2.0
             </div>
-            <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 900, letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)' }}>
               Create High-Converting Pitch Decks
             </h1>
             <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13, maxWidth: 620, lineHeight: 1.5 }}>
-              Choose from pre-built ready-made templates to edit visually in real time, or generate a tailored investor deck with AI.
+              Choose from pre-built ready-made templates to edit visually, or generate a tailored investor deck with AI.
             </p>
           </div>
         </div>
 
         {/* Top Creation Mode Selector Tabs */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
-          background: 'rgba(14, 18, 27, 0.8)', border: '1px solid var(--border)',
-          borderRadius: 14, padding: 6, marginBottom: 36, backdropFilter: 'blur(12px)',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 8,
+          background: 'var(--bg-sidebar)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-pill)',
+          padding: 4,
+          marginBottom: 36,
         }}>
           <button
             onClick={() => setCreationMode('templates')}
             style={{
-              background: creationMode === 'templates' ? 'var(--accent-gradient)' : 'transparent',
+              background: creationMode === 'templates' ? 'var(--brand)' : 'transparent',
               color: creationMode === 'templates' ? '#ffffff' : 'var(--text-muted)',
-              border: creationMode === 'templates' ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
-              borderRadius: 10, padding: '13px 20px',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              transition: 'all 0.2s ease',
-              boxShadow: creationMode === 'templates' ? '0 4px 16px rgba(99, 102, 241, 0.35)' : 'none',
+              border: 'none',
+              borderRadius: 'var(--radius-pill)',
+              padding: '10px 20px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'all 0.15s ease',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 2 7 12 12 22 7 12 2" />
               <polyline points="2 17 12 22 22 17" />
               <polyline points="2 12 12 17 22 12" />
@@ -118,17 +145,22 @@ export default function Home() {
           <button
             onClick={() => setCreationMode('ai')}
             style={{
-              background: creationMode === 'ai' ? 'var(--accent-gradient)' : 'transparent',
+              background: creationMode === 'ai' ? 'var(--brand)' : 'transparent',
               color: creationMode === 'ai' ? '#ffffff' : 'var(--text-muted)',
-              border: creationMode === 'ai' ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
-              borderRadius: 10, padding: '13px 20px',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              transition: 'all 0.2s ease',
-              boxShadow: creationMode === 'ai' ? '0 4px 16px rgba(99, 102, 241, 0.35)' : 'none',
+              border: 'none',
+              borderRadius: 'var(--radius-pill)',
+              padding: '10px 20px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'all 0.15s ease',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
             <span>Generate with AI Prompt</span>
@@ -145,9 +177,14 @@ export default function Home() {
           <>
             {/* Wizard Steps Navigation */}
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12,
-              background: 'var(--bg-card)', border: '1px solid var(--border)',
-              borderRadius: 12, padding: '12px 16px', marginBottom: 28,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 12,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '12px 16px',
+              marginBottom: 28,
             }}>
               {[
                 { stepNum: 1, title: 'Company Profile', desc: 'Identity & product details' },
@@ -161,24 +198,39 @@ export default function Home() {
                     key={s.stepNum}
                     onClick={() => completed && setStep(s.stepNum)}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px',
-                      borderRadius: 8, cursor: completed ? 'pointer' : 'default',
-                      background: active ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
-                      border: active ? '1px solid var(--accent)' : '1px solid transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-md)',
+                      cursor: completed ? 'pointer' : 'default',
+                      background: active ? 'var(--bg-tertiary)' : 'transparent',
+                      border: active ? '1px solid var(--border-highlight)' : '1px solid transparent',
                       transition: 'all 0.15s ease',
                     }}
                   >
                     <div style={{
-                      width: 28, height: 28, borderRadius: '50%',
-                      background: completed ? '#10b981' : (active ? 'var(--accent-gradient)' : 'var(--bg-sidebar)'),
-                      border: active ? 'none' : '1px solid var(--border)',
-                      color: '#ffffff', fontWeight: 800, fontSize: 12,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      background: completed ? 'var(--brand)' : (active ? 'var(--brand)' : 'var(--bg-sidebar)'),
+                      border: active || completed ? 'none' : '1px solid var(--border)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
                     }}>
-                      {completed ? '✓' : s.stepNum}
+                      {completed ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : s.stepNum}
                     </div>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: active ? 700 : 500, color: active ? 'var(--text)' : (completed ? '#34d399' : 'var(--text-subtle)') }}>
+                      <div style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--text)' : 'var(--text-subtle)' }}>
                         {s.title}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
@@ -192,8 +244,8 @@ export default function Home() {
 
             {/* Step 1 */}
             {step === 1 && (
-              <div className="notion-card">
-                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 800 }}>
+              <div className="notion-card" style={{ padding: '28px' }}>
+                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
                   Company Profile & Vision
                 </h2>
 
@@ -230,10 +282,13 @@ export default function Home() {
                 <div style={{ marginBottom: 28 }}>
                   <label>Company Logo (optional)</label>
                   <div style={{
-                    border: '1px dashed var(--border-highlight)', borderRadius: 10, padding: '20px',
-                    textAlign: 'center', cursor: 'pointer',
-                    background: logoFile ? 'rgba(99,102,241,0.08)' : 'var(--bg-sidebar)',
-                    transition: 'all 0.2s ease',
+                    border: '1px dashed var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '20px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: logoFile ? 'var(--bg-tertiary)' : 'var(--bg-sidebar)',
+                    transition: 'all 0.15s ease',
                   }}
                     onDragOver={e => e.preventDefault()}
                     onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) setLogoFile(f); }}
@@ -242,17 +297,17 @@ export default function Home() {
                       onChange={e => setLogoFile(e.target.files[0])} />
                     <label htmlFor="logo-input" style={{ cursor: 'pointer', color: 'var(--text-muted)', margin: 0 }}>
                       {logoFile ? (
-                        <span style={{ color: '#06b6d4', fontWeight: 700 }}>✓ Attached: {logoFile.name}</span>
+                        <span style={{ color: 'var(--brand)', fontWeight: 600 }}>Attached: {logoFile.name}</span>
                       ) : (
-                        <span>Drag & drop logo file here or <span style={{ color: 'var(--accent)', fontWeight: 600 }}>browse device</span></span>
+                        <span>Drag & drop logo file here or <span style={{ color: 'var(--brand)', fontWeight: 600 }}>browse device</span></span>
                       )}
                     </label>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1}>
-                    Next: Market & Goals →
+                  <button className="btn-primary" onClick={() => setStep(2)} disabled={!required1} style={{ borderRadius: 'var(--radius-pill)' }}>
+                    Next: Market & Goals
                   </button>
                 </div>
               </div>
@@ -260,8 +315,8 @@ export default function Home() {
 
             {/* Step 2 */}
             {step === 2 && (
-              <div className="notion-card">
-                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 800 }}>
+              <div className="notion-card" style={{ padding: '28px' }}>
+                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
                   Market, Financials & Slide Count
                 </h2>
 
@@ -295,17 +350,17 @@ export default function Home() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <input type="range" min="8" max="25" value={form.numSlides}
                       onChange={e => set('numSlides', parseInt(e.target.value))}
-                      style={{ flex: 1, accentColor: 'var(--accent)' }} />
-                    <span style={{ fontWeight: 800, color: '#06b6d4', fontSize: 16, width: 32, textAlign: 'right' }}>
+                      style={{ flex: 1, accentColor: 'var(--brand)' }} />
+                    <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 15, width: 32, textAlign: 'right' }}>
                       {form.numSlides}
                     </span>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button className="btn-secondary" onClick={() => setStep(1)}>← Back</button>
-                  <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2}>
-                    Next: Theme & Background →
+                  <button className="btn-secondary" onClick={() => setStep(1)} style={{ borderRadius: 'var(--radius-pill)' }}>Back</button>
+                  <button className="btn-primary" onClick={() => setStep(3)} disabled={!required2} style={{ borderRadius: 'var(--radius-pill)' }}>
+                    Next: Theme & Background
                   </button>
                 </div>
               </div>
@@ -313,8 +368,8 @@ export default function Home() {
 
             {/* Step 3 */}
             {step === 3 && (
-              <div className="notion-card">
-                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 800 }}>
+              <div className="notion-card" style={{ padding: '28px' }}>
+                <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>
                   Visual Style & Preset Background
                 </h2>
 
@@ -327,15 +382,17 @@ export default function Home() {
                         key={s.id}
                         onClick={() => set('style', s.id)}
                         style={{
-                          border: form.style === s.id ? `2px solid ${s.color}` : '1px solid var(--border)',
-                          borderRadius: 10, padding: '16px 14px', cursor: 'pointer',
-                          background: form.style === s.id ? `${s.color}15` : 'var(--bg-sidebar)',
-                          textAlign: 'center', transition: 'all 0.2s ease',
-                          boxShadow: form.style === s.id ? `0 0 16px ${s.color}40` : 'none',
+                          border: form.style === s.id ? '1px solid var(--brand)' : '1px solid var(--border)',
+                          borderRadius: 'var(--radius-md)',
+                          padding: '16px 14px',
+                          cursor: 'pointer',
+                          background: form.style === s.id ? 'var(--bg-tertiary)' : 'var(--bg-sidebar)',
+                          textAlign: 'center',
+                          transition: 'all 0.15s ease',
                         }}
                       >
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, margin: '0 auto 8px', boxShadow: `0 0 10px ${s.color}` }} />
-                        <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{s.label}</div>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: s.color, margin: '0 auto 8px' }} />
+                        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{s.label}</div>
                         <div style={{ color: 'var(--text-subtle)', fontSize: 11, marginTop: 4 }}>{s.desc}</div>
                       </div>
                     ))}
@@ -348,43 +405,50 @@ export default function Home() {
                   <div
                     onClick={() => setShowBgPicker(true)}
                     style={{
-                      border: '1px solid var(--border-highlight)', borderRadius: 10, padding: 16,
-                      background: activeBg.style.background,
-                      backgroundImage: activeBg.style.backgroundImage,
-                      backgroundSize: activeBg.style.backgroundSize || 'cover',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center',
-                      justifyContent: 'space-between', transition: 'all 0.2s ease',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: 16,
+                      background: 'var(--bg-card)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      transition: 'all 0.15s ease',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <div style={{
-                        width: 40, height: 40, borderRadius: 8,
-                        background: activeBg.previewGradient,
-                        border: `1px solid ${activeBg.style.border}`,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                        width: 36,
+                        height: 36,
+                        borderRadius: 'var(--radius-sm)',
+                        background: activeBg.previewGradient || 'var(--bg-tertiary)',
+                        border: '1px solid var(--border)',
                       }} />
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: 14, color: activeBg.style.color }}>
+                        <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>
                           {activeBg.name}
                         </div>
-                        <div style={{ fontSize: 11, color: activeBg.style.color, opacity: 0.85 }}>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                           {activeBg.description}
                         </div>
                       </div>
                     </div>
-                    <span className="btn-secondary" style={{ fontSize: 12, padding: '6px 12px' }}>
+                    <span className="btn-secondary" style={{ fontSize: 12, padding: '6px 14px', borderRadius: 'var(--radius-pill)' }}>
                       Change Background
                     </span>
                   </div>
                 </div>
 
-                {/* Configuration Summary Card */}
+                {/* Summary Card */}
                 <div style={{
-                  background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
-                  borderRadius: 10, padding: '16px 20px', marginBottom: 28,
+                  background: 'var(--bg-sidebar)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px 20px',
+                  marginBottom: 28,
                 }}>
-                  <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                    DECK GENERATION SUMMARY
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+                    Deck Generation Summary
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12 }}>
                     <div><span style={{ color: 'var(--text-muted)' }}>Company:</span> <strong>{form.companyName}</strong></div>
@@ -396,24 +460,22 @@ export default function Home() {
 
                 {error && (
                   <div style={{
-                    background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#f87171', borderRadius: 8, padding: '12px 16px', fontSize: 13, marginBottom: 20,
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    color: '#f87171',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '12px 16px',
+                    fontSize: 13,
+                    marginBottom: 20,
                   }}>
                     {error}
                   </div>
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <button className="btn-secondary" onClick={() => setStep(2)} disabled={loading}>← Back</button>
-                  <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ padding: '12px 28px', fontSize: 14 }}>
-                    {loading ? (
-                      <>
-                        <span className="animate-spin" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                        Generating Pitch Deck...
-                      </>
-                    ) : (
-                      'Generate Pitch Deck →'
-                    )}
+                  <button className="btn-secondary" onClick={() => setStep(2)} disabled={loading} style={{ borderRadius: 'var(--radius-pill)' }}>Back</button>
+                  <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ padding: '10px 24px', fontSize: 14, borderRadius: 'var(--radius-pill)' }}>
+                    {loading ? 'Generating Pitch Deck...' : 'Generate Pitch Deck'}
                   </button>
                 </div>
               </div>
@@ -433,4 +495,3 @@ export default function Home() {
     </NotionLayout>
   );
 }
-

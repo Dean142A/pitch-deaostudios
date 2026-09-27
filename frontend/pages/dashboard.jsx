@@ -1,4 +1,4 @@
-// pages/dashboard.jsx - Create UI Decks Database Studio
+// pages/dashboard.jsx - Linear Obsidian Decks Directory
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -45,32 +45,32 @@ export default function Dashboard() {
   const generatingCount = decks.filter(d => d.status === 'generating' || d.status === 'queued').length;
 
   if (loading) return (
-    <NotionLayout activeTab="dashboard" title="All Pitch Decks">
+    <NotionLayout activeTab="dashboard" title="Decks Directory">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
+        <div style={{ width: 32, height: 32, border: '2px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%' }} className="animate-spin" />
       </div>
     </NotionLayout>
   );
 
   return (
-    <NotionLayout activeTab="dashboard" title="All Pitch Decks">
-      <div style={{ padding: '36px 40px', maxWidth: 1280, margin: '0 auto' }}>
+    <NotionLayout activeTab="dashboard" title="Decks Directory">
+      <div style={{ padding: '36px 36px', maxWidth: 1280, margin: '0 auto' }}>
         
-        {/* Top Notion View Toolbar */}
+        {/* Top Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, gap: 16 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text)' }}>
-              Pitch Decks Database
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)' }}>
+              Pitch Decks
             </h1>
             <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
-              {decks.length} deck{decks.length !== 1 ? 's' : ''} in workspace studio
+              {decks.length} deck{decks.length !== 1 ? 's' : ''} in workspace
             </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link href="/?tab=templates" style={{ textDecoration: 'none' }}>
-              <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="12 2 2 7 12 12 22 7 12 2" />
                   <polyline points="2 17 12 22 22 17" />
                   <polyline points="2 12 12 17 22 12" />
@@ -80,75 +80,70 @@ export default function Dashboard() {
             </Link>
 
             <Link href="/?tab=ai" style={{ textDecoration: 'none' }}>
-              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span>New Pitch Deck</span>
+                <span>New Deck</span>
               </button>
             </Link>
           </div>
         </div>
 
-        {/* Studio Metrics Grid Cards */}
+        {/* Metrics Grid Cards */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28,
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28,
         }}>
           <div style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 6,
-            boxShadow: 'var(--shadow-card)',
+            borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              TOTAL DECKS
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Total Decks
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text)' }}>{decks.length}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)' }}>{decks.length}</div>
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 6,
-            boxShadow: 'var(--shadow-card)',
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              READY TO PRESENT
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Ready to Present
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#34d399' }}>{completedCount}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#34d399' }}>{completedCount}</div>
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 6,
-            boxShadow: 'var(--shadow-card)',
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              ACTIVE DRAFTS
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Active Drafts
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#fbbf24' }}>{generatingCount}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#fbbf24' }}>{generatingCount}</div>
           </div>
 
           <div style={{
-            background: 'var(--bg-card)', border: '1px solid rgba(99, 102, 241, 0.3)',
-            borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 6,
-            boxShadow: 'var(--shadow-card)',
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 4,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              STUDIO CAPACITY
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Workspace
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#06b6d4' }}>Unlimited</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--brand)' }}>Unlimited</div>
           </div>
         </div>
 
-        {/* Search & Filter Studio Bar */}
+        {/* Search & Filter Bar */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'rgba(14, 18, 27, 0.8)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: '12px 18px', marginBottom: 28, gap: 16, flexWrap: 'wrap',
-          backdropFilter: 'blur(12px)',
+          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)', padding: '12px 18px', marginBottom: 28, gap: 16, flexWrap: 'wrap',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 260 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--text-subtle)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 260 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-subtle)' }}>
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -162,16 +157,22 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-subtle)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>FILTER:</span>
+            <span style={{ fontSize: 11, color: 'var(--text-subtle)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Filter:</span>
             {['all', 'completed', 'generating', 'queued', 'failed'].map(st => (
               <button
                 key={st}
                 onClick={() => setFilterStatus(st)}
                 style={{
-                  background: filterStatus === st ? 'var(--accent-gradient)' : 'var(--bg-card)',
-                  border: filterStatus === st ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)',
-                  borderRadius: 20, color: filterStatus === st ? '#ffffff' : 'var(--text-muted)',
-                  fontSize: 11, fontWeight: 700, padding: '4px 12px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.04em',
+                  background: filterStatus === st ? 'var(--brand)' : 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-pill)',
+                  color: filterStatus === st ? '#ffffff' : 'var(--text-muted)',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: '4px 12px',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -186,20 +187,20 @@ export default function Dashboard() {
           <div style={{
             textAlign: 'center', padding: '64px 20px',
             background: 'var(--bg-card)', border: '1px dashed var(--border)',
-            borderRadius: 14,
+            borderRadius: 'var(--radius-lg)',
           }}>
-            <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text)', fontWeight: 800 }}>No pitch decks found</h3>
+            <h3 style={{ margin: '0 0 6px', fontSize: 18, color: 'var(--text)', fontWeight: 700 }}>No pitch decks found</h3>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: 'var(--text-muted)' }}>
               {search || filterStatus !== 'all' ? 'Try adjusting your search query or status filter' : 'Create your first presentation deck using AI or a template'}
             </p>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <button className="btn-primary">Create New Deck</button>
+              <button className="btn-primary" style={{ borderRadius: 'var(--radius-pill)' }}>Create New Deck</button>
             </Link>
           </div>
         ) : (
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-            gap: 24,
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: 20,
           }}>
             {filteredDecks.map(deck => {
               const bgPresetId = deck.input_data?.backgroundPreset || 'dark-obsidian';
@@ -211,25 +212,34 @@ export default function Dashboard() {
                   className="notion-card"
                   onClick={() => router.push(`/deck/${deck.id}`)}
                   style={{
-                    padding: 0, overflow: 'hidden', cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column',
+                    padding: 0,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
                   {/* Preset Background Banner */}
                   <div style={{
-                    height: 140,
-                    background: preset.style.background,
-                    backgroundImage: preset.style.backgroundImage,
-                    backgroundSize: preset.style.backgroundSize || 'cover',
-                    display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                    padding: 16, borderBottom: '1px solid var(--border)', position: 'relative',
+                    height: 120,
+                    background: 'var(--bg-tertiary)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    padding: 16,
+                    borderBottom: '1px solid var(--border-subtle)',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{
-                        fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-                        background: 'rgba(0, 0, 0, 0.6)', color: preset.style.color,
-                        backdropFilter: 'blur(6px)', border: `1px solid ${preset.style.border}`,
-                        textTransform: 'uppercase', letterSpacing: '0.05em',
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        borderRadius: 'var(--radius-pill)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-muted)',
+                        border: '1px solid var(--border-subtle)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
                       }}>
                         {preset.name}
                       </span>
@@ -239,19 +249,23 @@ export default function Dashboard() {
                     </div>
 
                     <div style={{
-                      fontSize: 17, fontWeight: 900, color: preset.style.color,
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: 'var(--text)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}>
                       {deck.name}
                     </div>
                   </div>
 
                   {/* Card Info Body */}
-                  <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-                        <span style={{ fontWeight: 600 }}>{deck.slide_count || deck.num_slides || 15} slides</span>
-                        <span>•</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                        <span style={{ fontWeight: 500 }}>{deck.slide_count || deck.num_slides || 15} slides</span>
+                        <span style={{ opacity: 0.4 }}>•</span>
                         <span>{deck.owner_name || 'Studio Owner'}</span>
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
@@ -260,20 +274,32 @@ export default function Dashboard() {
                     </div>
 
                     <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 16,
+                      paddingTop: 12,
+                      borderTop: '1px solid var(--border-subtle)',
                     }}>
-                      <span style={{ fontSize: 12, color: '#06b6d4', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <span>Open Canvas</span>
-                        <span>→</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </span>
                       <button
                         onClick={e => handleDeleteDeck(e, deck.id)}
                         title="Delete Deck"
                         style={{
-                          background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
-                          color: '#f87171', cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                          padding: '4px 8px', borderRadius: 6, transition: 'all 0.15s ease',
+                          background: 'transparent',
+                          border: '1px solid var(--border-subtle)',
+                          color: '#f87171',
+                          cursor: 'pointer',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: '3px 10px',
+                          borderRadius: 'var(--radius-pill)',
+                          transition: 'all 0.15s ease',
                         }}
                       >
                         Delete
@@ -289,4 +315,3 @@ export default function Dashboard() {
     </NotionLayout>
   );
 }
-

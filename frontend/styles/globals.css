@@ -1,42 +1,38 @@
-/* styles/globals.css - Modern Deao Studios Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* styles/globals.css - Linear.app Obsidian System (No Gradients, Helvetica Neue, Pill Buttons) */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Deao Studios Dark Studio Theme */
-  --bg: #090b10;
-  --bg-sidebar: #0e111a;
-  --bg-card: #141824;
-  --bg-hover: #1c2234;
-  --bg-elevated: #1a2030;
-  --border: #232a3e;
-  --border-light: rgba(255, 255, 255, 0.07);
-  --border-highlight: rgba(99, 102, 241, 0.4);
+  /* Linear Dark Obsidian Palette (Solid, High-Contrast, No Gradients) */
+  --bg: #0b0d11;
+  --bg-sidebar: #12151e;
+  --bg-card: #171b26;
+  --bg-hover: #202636;
+  --bg-elevated: #1e2332;
+  --border: #262b3a;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-highlight: #5e6ad2;
   
-  --accent: #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.35);
-  --accent-2: #818cf8;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+  --accent: #5e6ad2;
+  --accent-hover: #6e7cd8;
+  --accent-muted: rgba(94, 106, 210, 0.15);
   
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-subtle: #64748b;
+  --text: #f7f8f8;
+  --text-muted: #8a8f9d;
+  --text-subtle: #626775;
 
-  --notion-callout: rgba(99, 102, 241, 0.08);
-  --notion-callout-border: rgba(99, 102, 241, 0.25);
+  --notion-callout: rgba(94, 106, 210, 0.08);
+  --notion-callout-border: rgba(94, 106, 210, 0.3);
   
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.2);
+  --radius-pill: 9999px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 * {
@@ -48,21 +44,22 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 code, pre {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 
-/* Custom Studio Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -71,112 +68,105 @@ code, pre {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 999px;
+  background: rgba(138, 143, 157, 0.25);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+  background: rgba(94, 106, 210, 0.5);
 }
 
-/* Deao Cards & Glass Panels */
+/* Cards & Panels */
 .notion-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 24px;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 .notion-card:hover {
   border-color: var(--border-highlight);
-  box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.6), var(--shadow-glow);
 }
 
 .notion-callout {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: var(--notion-callout);
+  border: 1px solid var(--notion-callout-border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  font-size: 14px;
-  backdrop-filter: blur(8px);
+  font-size: 13.5px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Premium Buttons */
+/* Pill Buttons (Strictly Solid Colors, NO Gradients) */
 .btn-primary {
-  background: var(--accent-gradient);
+  background: var(--accent);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-sm);
-  padding: 9px 18px;
-  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  transition: all 0.15s ease;
 }
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-  filter: brightness(1.08);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 .btn-secondary {
   background: var(--bg-card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 18px;
-  font-family: 'Inter', sans-serif;
+  border-radius: var(--radius-pill);
+  padding: 9px 20px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 .btn-secondary:hover {
   background: var(--bg-hover);
   border-color: var(--text-subtle);
   color: #ffffff;
-  transform: translateY(-1px);
 }
 .btn-secondary:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 /* Form Inputs */
 .input {
   background: var(--bg-sidebar);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   color: var(--text);
   padding: 10px 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13.5px;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 .input::placeholder {
   color: var(--text-subtle);
@@ -190,53 +180,47 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 6px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Status Badges */
+/* Pill Badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
   font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .badge-generating { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
 .badge-completed { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-.badge-drafting { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+.badge-drafting { background: rgba(94,106,210,0.15); color: #a5b4fc; border: 1px solid rgba(94,106,210,0.3); }
 .badge-failed { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-.badge-queued { background: rgba(148,163,184,0.15); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-queued { background: rgba(138,143,157,0.15); color: var(--text-muted); border: 1px solid var(--border); }
 
 /* Slide preview container */
 .slide-thumb {
   aspect-ratio: 16/9;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 .slide-thumb:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99,102,241,0.2);
 }
 .slide-thumb.active {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
 }
 
 /* Animations */
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .animate-spin { animation: spin 1s linear infinite; }
 
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-.animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
 

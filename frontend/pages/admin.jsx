@@ -1,4 +1,4 @@
-// pages/admin.jsx - Create UI Admin & AI Settings Studio
+// pages/admin.jsx - Linear Obsidian Admin Settings
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import NotionLayout from '../components/NotionLayout';
@@ -75,18 +75,22 @@ export default function Admin() {
 
   return (
     <NotionLayout activeTab="admin" title="Admin Settings">
-      <div style={{ padding: '36px 40px', maxWidth: 960, margin: '0 auto' }}>
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ margin: '0 0 6px', fontSize: 26, fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text)' }}>
-            Admin & Studio Settings
+      <div style={{ padding: '36px 36px', maxWidth: 960, margin: '0 auto' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)' }}>
+            Admin & Settings
           </h1>
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13 }}>
-            Manage AI Provider keys, active LLM preferences, and workspace team permissions
+            Manage AI Provider keys, LLM preferences, and workspace team permissions
           </p>
         </div>
 
-        {/* Studio Tabs */}
-        <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid var(--border)', marginBottom: 28 }}>
+        {/* Navigation Tabs */}
+        <div style={{
+          display: 'inline-flex', gap: 6,
+          background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-pill)', padding: 4, marginBottom: 28,
+        }}>
           {[
             { id: 'ai', label: 'AI Provider Settings' },
             { id: 'users', label: 'User Access Control' },
@@ -95,11 +99,14 @@ export default function Admin() {
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
-                background: 'none', border: 'none',
-                borderBottom: tab === t.id ? '2px solid #06b6d4' : '2px solid transparent',
-                color: tab === t.id ? 'var(--text)' : 'var(--text-muted)',
-                fontWeight: tab === t.id ? 700 : 500, fontSize: 13,
-                padding: '10px 18px', cursor: 'pointer', marginBottom: -1,
+                background: tab === t.id ? 'var(--brand)' : 'transparent',
+                color: tab === t.id ? '#ffffff' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: 'var(--radius-pill)',
+                padding: '8px 18px',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -109,33 +116,33 @@ export default function Admin() {
         </div>
 
         {tab === 'ai' && (
-          <div className="notion-card">
-            <h3 style={{ margin: '0 0 16px', fontSize: 17, fontWeight: 800 }}>AI Model Credentials</h3>
+          <div className="notion-card" style={{ padding: '28px' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 17, fontWeight: 700 }}>AI Model Credentials</h3>
 
             {aiStatus && (
               <div style={{
-                background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
-                borderRadius: 10, padding: 18, marginBottom: 24,
+                background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)', padding: 18, marginBottom: 24,
               }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-                  LIVE LLM STATUS
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+                  Live LLM Status
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, fontSize: 13 }}>
                   <div>
                     <span style={{ color: 'var(--text-muted)' }}>Google Gemini: </span>
-                    <span style={{ color: aiStatus.geminiConfigured ? '#34d399' : '#f87171', fontWeight: 700 }}>
+                    <span style={{ color: aiStatus.geminiConfigured ? '#34d399' : '#f87171', fontWeight: 600 }}>
                       {aiStatus.geminiConfigured ? 'Active' : 'Not set'}
                     </span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)' }}>Anthropic Claude: </span>
-                    <span style={{ color: aiStatus.anthropicConfigured ? '#34d399' : 'var(--text-subtle)', fontWeight: 700 }}>
+                    <span style={{ color: aiStatus.anthropicConfigured ? '#34d399' : 'var(--text-subtle)', fontWeight: 600 }}>
                       {aiStatus.anthropicConfigured ? 'Active' : 'Off'}
                     </span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)' }}>Active Provider: </span>
-                    <span style={{ fontWeight: 800, color: '#06b6d4' }}>{aiStatus.activeProvider}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--brand)' }}>{aiStatus.activeProvider}</span>
                   </div>
                 </div>
               </div>
@@ -171,17 +178,17 @@ export default function Admin() {
             {testResult && (
               <div style={{
                 background: testResult.ok === true ? 'rgba(16,185,129,0.1)' : testResult.ok === false ? 'rgba(239,68,68,0.1)' : 'var(--bg-sidebar)',
-                border: `1px solid ${testResult.ok === true ? 'rgba(16,185,129,0.3)' : testResult.ok === false ? 'rgba(239,68,68,0.3)' : 'var(--border)'}`,
+                border: `1px solid ${testResult.ok === true ? 'rgba(16,185,129,0.25)' : testResult.ok === false ? 'rgba(239,68,68,0.25)' : 'var(--border)'}`,
                 color: testResult.ok === true ? '#34d399' : testResult.ok === false ? '#f87171' : 'var(--text)',
-                borderRadius: 8, padding: '12px 16px', fontSize: 13, marginBottom: 24,
+                borderRadius: 'var(--radius-md)', padding: '12px 16px', fontSize: 13, marginBottom: 24,
               }}>
                 {testResult.message}
               </div>
             )}
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button className="btn-secondary" onClick={testAI}>Test Connection</button>
-              <button className="btn-primary" onClick={saveAIKeys} disabled={saving}>
+              <button className="btn-secondary" onClick={testAI} style={{ borderRadius: 'var(--radius-pill)' }}>Test Connection</button>
+              <button className="btn-primary" onClick={saveAIKeys} disabled={saving} style={{ borderRadius: 'var(--radius-pill)' }}>
                 {saving ? 'Saving...' : 'Save AI Credentials'}
               </button>
             </div>
@@ -191,8 +198,8 @@ export default function Admin() {
         {tab === 'users' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Add User Form */}
-            <div className="notion-card">
-              <h3 style={{ margin: '0 0 18px', fontSize: 17, fontWeight: 800 }}>Add Team Member</h3>
+            <div className="notion-card" style={{ padding: '28px' }}>
+              <h3 style={{ margin: '0 0 18px', fontSize: 17, fontWeight: 700 }}>Add Team Member</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div>
                   <label>Full Name</label>
@@ -223,21 +230,21 @@ export default function Admin() {
                 </div>
               )}
 
-              <button className="btn-primary" onClick={createUser}>Create User Account</button>
+              <button className="btn-primary" onClick={createUser} style={{ borderRadius: 'var(--radius-pill)' }}>Create User Account</button>
             </div>
 
             {/* Users Directory */}
-            <div className="notion-card">
-              <h3 style={{ margin: '0 0 18px', fontSize: 17, fontWeight: 800 }}>Team Users ({users.length})</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="notion-card" style={{ padding: '28px' }}>
+              <h3 style={{ margin: '0 0 18px', fontSize: 17, fontWeight: 700 }}>Team Users ({users.length})</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {users.map(u => (
                   <div key={u.id} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '12px 16px', background: 'var(--bg-sidebar)', border: '1px solid var(--border)',
-                    borderRadius: 10, fontSize: 13,
+                    padding: '12px 16px', background: 'var(--bg-sidebar)', border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)', fontSize: 13,
                   }}>
                     <div>
-                      <span style={{ fontWeight: 700, color: 'var(--text)' }}>{u.name}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--text)' }}>{u.name}</span>
                       <span style={{ color: 'var(--text-subtle)', marginLeft: 10 }}>({u.email})</span>
                     </div>
                     <span className="badge badge-drafting" style={{ textTransform: 'uppercase' }}>
@@ -253,4 +260,3 @@ export default function Admin() {
     </NotionLayout>
   );
 }
-
