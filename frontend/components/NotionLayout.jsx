@@ -34,7 +34,7 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
     {
       id: 'templates',
       label: 'Templates',
-      path: '/?tab=templates',
+      path: '/create?tab=templates',
       svg: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 2 7 12 12 22 7 12 2" />
@@ -46,7 +46,7 @@ export default function NotionLayout({ children, activeTab = 'dashboard', title 
     {
       id: 'new',
       label: 'AI Generator',
-      path: '/?tab=ai',
+      path: '/create?tab=ai',
       primary: true,
       svg: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

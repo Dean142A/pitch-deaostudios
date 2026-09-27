@@ -68,7 +68,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/?tab=templates" style={{ textDecoration: 'none' }}>
+            <Link href="/create?tab=templates" style={{ textDecoration: 'none' }}>
               <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="12 2 2 7 12 12 22 7 12 2" />
@@ -79,7 +79,7 @@ export default function Dashboard() {
               </button>
             </Link>
 
-            <Link href="/?tab=ai" style={{ textDecoration: 'none' }}>
+            <Link href="/create?tab=ai" style={{ textDecoration: 'none' }}>
               <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-pill)', fontWeight: 400 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
